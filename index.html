@@ -14,17 +14,15 @@
     <div id="game-container"></div>
 
     <script>
-        // โหลดไฟล์เสียง (อัปเดตชื่อให้ไม่มีเว้นวรรคแล้ว)
         const audio = {
             click: new Audio('assets/click.mp3'),
-            flip: new Audio('assets/flip.mp3'),
             correct: new Audio('assets/correct.mp3'),
             wrong: new Audio('assets/wrong.mp3'),
-            bgm: new Audio('assets/soundgame.mp3') 
+            bgm: new Audio('assets/soundgame.mp3')
         };
         audio.bgm.loop = true;
-        audio.bgm.play();
-
+        // ปิด auto-play เพลงประกอบไว้ก่อนเพื่อป้องกัน Browser บล็อก
+        
         const cardFiles = [
             '100_biodegradable_1.png', '100_biodegradable_2.png',
             'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png',
@@ -43,7 +41,7 @@
 
         cardFiles.sort(() => Math.random() - 0.5).forEach(file => {
             const card = document.createElement('img');
-            card.src = 'assets/Back_Card_Game_Start.jpg';
+            card.src = 'assets/card_back.png'; // แก้ไขตรงนี้แล้ว!
             card.dataset.front = 'assets/' + file;
             card.className = 'card';
             
@@ -63,12 +61,12 @@
 
         function checkMatch() {
             const [c1, c2] = flippedCards;
-            const isMatch = c1.dataset.front.split('_').slice(0,-1).join('_') === 
-                            c2.dataset.front.split('_').slice(0,-1).join('_');
+            const name1 = c1.dataset.front.split('_').slice(0,-1).join('_');
+            const name2 = c2.dataset.front.split('_').slice(0,-1).join('_');
 
-            if (isMatch) {
+            if (name1 === name2) {
                 audio.correct.play();
-                addAura(c1, 'assets/aura-correct.png'); // แก้ไข: ไม่มีเว้นวรรค
+                addAura(c1, 'assets/aura-correct.png');
                 addAura(c2, 'assets/aura-correct.png');
                 flippedCards = [];
                 canClick = true;
@@ -77,7 +75,8 @@
                 addAura(c1, 'assets/aura-wrong.png');
                 addAura(c2, 'assets/aura-wrong.png');
                 setTimeout(() => {
-                    c1.src = c2.src = 'assets/Back_Card_Game_Start.jpg';
+                    c1.src = 'assets/card_back.png';
+                    c2.src = 'assets/card_back.png';
                     document.querySelectorAll('.aura').forEach(e => e.remove());
                     flippedCards = [];
                     canClick = true;
@@ -95,7 +94,12 @@
         }
 
         let idle = setInterval(() => { window.location.href = 'video.html'; }, 120000);
-        document.onclick = () => { clearInterval(idle); idle = setInterval(() => { window.location.href = 'video.html'; }, 120000); };
+        document.onclick = () => { 
+            clearInterval(idle); 
+            idle = setInterval(() => { window.location.href = 'video.html'; }, 120000); 
+            // ลองเริ่มเล่นเพลงประกอบเมื่อมีการคลิกครั้งแรก
+            if (audio.bgm.paused) audio.bgm.play();
+        };
     </script>
 </body>
 </html>
