@@ -14,25 +14,25 @@
     <div id="game-container"></div>
 
     <script>
-        // โหลดไฟล์เสียงทั้งหมดที่อัปโหลดไว้
+        // โหลดไฟล์เสียง (อัปเดตชื่อให้ไม่มีเว้นวรรคแล้ว)
         const audio = {
             click: new Audio('assets/click.mp3'),
             flip: new Audio('assets/flip.mp3'),
             correct: new Audio('assets/correct.mp3'),
             wrong: new Audio('assets/wrong.mp3'),
-            bgm: new Audio('assets/sound game.mp3') // ระวังเรื่องช่องว่างชื่อไฟล์ ถ้าใน GitHub ไม่มีช่องว่างให้ลบออกนะ
+            bgm: new Audio('assets/soundgame.mp3') 
         };
         audio.bgm.loop = true;
-        audio.bgm.play(); // เริ่มเพลงคลอ
+        audio.bgm.play();
 
         const cardFiles = [
             '100_biodegradable_1.png', '100_biodegradable_2.png',
-            'biodegradable handle bags_1.png', 'biodegradable handle bags_2.png',
-            'biodegradable plastic_1.png', 'biodegradable plastic_2.png',
+            'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png',
+            'biodegradable_plastic_1.png', 'biodegradable_plastic_2.png',
             'ceo_addy_1.png', 'ceo_addy_2.png',
             'eco-friendly_1.png', 'eco-friendly_2.png',
             'ecoplas_1.png', 'ecoplas_2.png',
-            'handle bags_1.png', 'handle bags_2.png',
+            'handle_bags_1.png', 'handle_bags_2.png',
             'nature_x_1.png', 'nature_x_2.png',
             'set_cafe_1.png', 'set_cafe_2.png'
         ];
@@ -49,7 +49,7 @@
             
             card.onclick = () => {
                 if (!canClick || flippedCards.includes(card)) return;
-                audio.click.play(); // เล่นเสียงคลิก
+                audio.click.play();
                 card.src = card.dataset.front;
                 flippedCards.push(card);
 
@@ -67,13 +67,13 @@
                             c2.dataset.front.split('_').slice(0,-1).join('_');
 
             if (isMatch) {
-                audio.correct.play(); // เล่นเสียงตอบถูก
-                addAura(c1, 'assets/aura-correct .png');
-                addAura(c2, 'assets/aura-correct .png');
+                audio.correct.play();
+                addAura(c1, 'assets/aura-correct.png'); // แก้ไข: ไม่มีเว้นวรรค
+                addAura(c2, 'assets/aura-correct.png');
                 flippedCards = [];
                 canClick = true;
             } else {
-                audio.wrong.play(); // เล่นเสียงตอบผิด
+                audio.wrong.play();
                 addAura(c1, 'assets/aura-wrong.png');
                 addAura(c2, 'assets/aura-wrong.png');
                 setTimeout(() => {
@@ -94,7 +94,6 @@
             aura.style.top = card.offsetTop - 10 + 'px';
         }
 
-        // Idle 2 นาที
         let idle = setInterval(() => { window.location.href = 'video.html'; }, 120000);
         document.onclick = () => { clearInterval(idle); idle = setInterval(() => { window.location.href = 'video.html'; }, 120000); };
     </script>
