@@ -2,78 +2,34 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <title>AdvanceBIO Matching Game</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
-        .screen { width: 100vw; height: 100vh; position: absolute; display: none; background-size: cover; background-position: center; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        .screen { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; }
+        
+        /* หน้าจอเริ่มต้น */
         #start-screen { display: block; background-image: url('BG_First.jpg'); }
-        #game-screen { background-image: url('BG_Playgame.jpg'); }
-
-        /* วิดีโอหมีหน้าแรก */
-        #idle-bear { position: absolute; bottom: 10%; left: 10%; width: 300px; }
-        #start-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; }
-
-        /* หน้าเกม - ปุ่ม Home */
-        #home-btn { position: absolute; top: 20px; right: 20px; width: 80px; cursor: pointer; }
-
-        /* แถบเวลา */
-        #timer-box { position: absolute; top: 20px; left: 50px; width: 400px; height: 50px; display: flex; align-items: center; }
-        #timer-bar { position: relative; width: 300px; height: 20px; }
-        #timer-bg { width: 100%; height: 100%; position: absolute; }
-        #timer-color { width: 100%; height: 100%; background: url('time-bar-color.png'); }
-        #timer-head { width: 50px; margin-left: -20px; }
-
-        /* ตารางการ์ด */
-        #grid { position: absolute; top: 15%; left: 10%; width: 80%; height: 70%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
-        .card { width: 100%; cursor: pointer; }
+        #start-btn { position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; width: 200px; }
+        
+        /* หน้าจอเกม */
+        #game-screen { display: none; background-image: url('BG_Playgame.jpg'); }
     </style>
 </head>
 <body>
 
     <div id="start-screen" class="screen">
-        <video id="idle-bear" src="bear-action.mp4" autoplay loop muted></video>
         <img id="start-btn" src="btn-start.png" onclick="startGame()">
     </div>
 
     <div id="game-screen" class="screen">
-        <img id="home-btn" src="btn-home.png" onclick="location.reload()">
-        
-        <div id="timer-box">
-            <div id="timer-bar">
-                <img id="timer-bg" src="time-bar-bg.png">
-                <div id="timer-color"></div>
-            </div>
-            <img id="timer-head" src="bear-timer-head.png">
         </div>
-
-        <div id="grid"></div>
-    </div>
 
     <script>
         function startGame() {
+            // ตรวจสอบว่าฟังก์ชันทำงานหรือไม่โดยการซ่อนหน้าแรกและโชว์หน้าเกม
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
-            runTimer();
-            initCards();
-        }
-
-        function runTimer() {
-            let time = 60;
-            const bar = document.getElementById('timer-color');
-            const interval = setInterval(() => {
-                time--;
-                bar.style.width = (time / 60 * 100) + '%';
-                if(time <= 0) { clearInterval(interval); alert("หมดเวลา!"); }
-            }, 1000);
-        }
-
-        function initCards() {
-            const grid = document.getElementById('grid');
-            for(let i=0; i<18; i++) { // สร้างการ์ด 18 ใบ
-                const card = document.createElement('img');
-                card.src = 'card_back.png';
-                card.className = 'card';
-                grid.appendChild(card);
-            }
+            console.log("Game Started");
         }
     </script>
 </body>
