@@ -2,63 +2,57 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>AdvanceBIO Memory Game</title>
+    <title>AdvanceBIO Game Layout</title>
     <style>
+        /* ตั้งค่าพื้นฐาน */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        .screen { width: 100vw; height: 100vh; position: absolute; background-size: cover; display: none; }
-        #start-screen { display: block; background-image: url('assets/BG_First.jpg'); }
-        #game-screen { background-image: url('assets/BG_Playgame.jpg'); }
+        .screen { width: 100vw; height: 100vh; position: absolute; background-size: cover; background-position: center; }
 
-        /* UI Elements */
-        #start-btn { position: absolute; top: 60%; left: 50%; transform: translateX(-50%); cursor: pointer; }
-        #home-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; }
-        #timer-box { position: absolute; top: 20px; left: 50px; display: flex; align-items: center; }
-        #grid { position: absolute; top: 15%; left: 10%; width: 80%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        /* หน้า Start */
+        #start-screen { background-image: url('assets/BG_First.jpg'); display: block; z-index: 2; }
+        #start-btn { position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%); width: 20%; cursor: pointer; }
+        
+        /* หน้าเกม */
+        #game-screen { background-image: url('assets/BG_Playgame.jpg'); display: none; z-index: 1; }
+        #home-btn { position: absolute; top: 3%; right: 3%; width: 5%; cursor: pointer; }
+        
+        /* แถบเวลา */
+        #timer-box { position: absolute; top: 3%; left: 5%; width: 30%; display: flex; align-items: center; }
+        #time-bar-bg { width: 80%; }
+        #bear-timer-head { width: 15%; margin-left: -5%; }
+
+        /* ตารางการ์ด (บาลานซ์ตรงกลาง) */
+        #grid { position: absolute; top: 18%; left: 10%; width: 80%; height: 70%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        .card { width: 100%; height: auto; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="start-screen" class="screen">
-        <video src="assets/bear-action.mp4" autoplay loop muted style="position:absolute; bottom:5%; left:5%; width:300px;"></video>
-        <img id="start-btn" src="assets/btn-start.png" onclick="startGame()">
+        <video src="assets/bear-action.mp4" autoplay loop muted style="position:absolute; bottom:5%; left:5%; width:20%;"></video>
+        <img id="start-btn" src="assets/btn-start.png" onclick="document.getElementById('start-screen').style.display='none'; document.getElementById('game-screen').style.display='block';">
     </div>
 
     <div id="game-screen" class="screen">
         <img id="home-btn" src="assets/btn-home.png" onclick="location.reload()">
+        
         <div id="timer-box">
-            <img src="assets/time-bar-bg.png">
-            <div id="timer-color" style="width:100%; height:20px; background:red;"></div>
-            <img src="assets/bear-timer-head.png">
+            <img id="time-bar-bg" src="assets/time-bar-bg.png">
+            <img id="bear-timer-head" src="assets/bear-timer-head.png">
         </div>
-        <div id="grid"></div>
+
+        <div id="grid">
+            <script>
+                const grid = document.getElementById('grid');
+                for(let i=0; i<18; i++) {
+                    const card = document.createElement('img');
+                    card.src = 'assets/card_back.png';
+                    card.className = 'card';
+                    grid.appendChild(card);
+                }
+            </script>
+        </div>
     </div>
 
-    <script>
-        const bgm = new Audio('assets/soundgame.mp3');
-
-        function startGame() {
-            // 1. เปลี่ยนหน้าจอ
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            
-            // 2. เริ่มเพลง (ต้องเริ่มหลัง Interaction)
-            bgm.loop = true;
-            bgm.play();
-
-            // 3. เริ่มเกม
-            initGame();
-        }
-
-        function initGame() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = ''; 
-            for(let i=0; i<18; i++) {
-                const card = document.createElement('img');
-                card.src = 'assets/card_back.png';
-                card.className = 'card';
-                grid.appendChild(card);
-            }
-        }
-    </script>
 </body>
 </html>
