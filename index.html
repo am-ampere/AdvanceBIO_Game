@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>AdvanceBIO Memory Game</title>
+    <style>
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #game-container { width: 100vw; height: 100vh; background: url('assets/BG_Playgame.jpg') no-repeat center/cover; position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; padding: 50px; justify-items: center; }
+        .card { width: 120px; height: 120px; cursor: pointer; border-radius: 10px; transition: transform 0.3s; position: relative; }
+        .aura { position: absolute; width: 140px; height: 140px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
 
+    <script>
+        // โหลดไฟล์เสียงทั้งหมดที่อัปโหลดไว้
+        const audio = {
+            click: new Audio('assets/click.mp3'),
+            flip: new Audio('assets/flip.mp3'),
+            correct: new Audio('assets/correct.mp3'),
+            wrong: new Audio('assets/wrong.mp3'),
+            bgm: new Audio('assets/sound game.mp3') // ระวังเรื่องช่องว่างชื่อไฟล์ ถ้าใน GitHub ไม่มีช่องว่างให้ลบออกนะ
+        };
+        audio.bgm.loop = true;
+        audio.bgm.play(); // เริ่มเพลงคลอ
+
+        const cardFiles = [
+            '100_biodegradable_1.png', '100_biodegradable_2.png',
+            'biodegradable handle bags_1.png', 'biodegradable handle bags_2.png',
+            'biodegradable plastic_1.png', 'biodegradable plastic_2.png',
+            'ceo_addy_1.png', 'ceo_addy_2.png',
+            'eco-friendly_1.png', 'eco-friendly_2.png',
+            'ecoplas_1.png', 'ecoplas_2.png',
+            'handle bags_1.png', 'handle bags_2.png',
+            'nature_x_1.png', 'nature_x_2.png',
+            'set_cafe_1.png', 'set_cafe_2.png'
+        ];
+
+        const grid = document.getElementById('game-container');
+        let flippedCards = [];
+        let canClick = true;
+
+        cardFiles.sort(() => Math.random() - 0.5).forEach(file => {
+            const card = document.createElement('img');
+            card.src = 'assets/Back_Card_Game_Start.jpg';
+            card.dataset.front = 'assets/' + file;
+            card.className = 'card';
+            
+            card.onclick = () => {
+                if (!canClick || flippedCards.includes(card)) return;
+                audio.click.play(); // เล่นเสียงคลิก
+                card.src = card.dataset.front;
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    canClick = false;
+                    checkMatch();
+                }
+            };
+            grid.appendChild(card);
+        });
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            const isMatch = c1.dataset.front.split('_').slice(0,-1).join('_') === 
+                            c2.dataset.front.split('_').slice(0,-1).join('_');
+
+            if (isMatch) {
+                audio.correct.play(); // เล่นเสียงตอบถูก
+                addAura(c1, 'assets/aura-correct .png');
+                addAura(c2, 'assets/aura-correct .png');
+                flippedCards = [];
+                canClick = true;
+            } else {
+                audio.wrong.play(); // เล่นเสียงตอบผิด
+                addAura(c1, 'assets/aura-wrong.png');
+                addAura(c2, 'assets/aura-wrong.png');
+                setTimeout(() => {
+                    c1.src = c2.src = 'assets/Back_Card_Game_Start.jpg';
+                    document.querySelectorAll('.aura').forEach(e => e.remove());
+                    flippedCards = [];
+                    canClick = true;
+                }, 1000);
+            }
+        }
+
+        function addAura(card, imgPath) {
+            const aura = document.createElement('img');
+            aura.src = imgPath;
+            aura.className = 'aura';
+            card.parentNode.appendChild(aura);
+            aura.style.left = card.offsetLeft - 10 + 'px';
+            aura.style.top = card.offsetTop - 10 + 'px';
+        }
+
+        // Idle 2 นาที
+        let idle = setInterval(() => { window.location.href = 'video.html'; }, 120000);
+        document.onclick = () => { clearInterval(idle); idle = setInterval(() => { window.location.href = 'video.html'; }, 120000); };
+    </script>
+</body>
+</html>
