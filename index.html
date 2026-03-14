@@ -2,80 +2,78 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>AdvanceBIO Memory Game</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; }
-        #screen { width: 100vw; height: 100vh; position: relative; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
+        .screen { width: 100vw; height: 100vh; position: absolute; display: none; background-size: cover; background-position: center; }
+        #start-screen { display: block; background-image: url('BG_First.jpg'); }
+        #game-screen { background-image: url('BG_Playgame.jpg'); }
 
-        /* หน้า Start */
-        #start-screen { 
-            background: url('assets/BG_First.jpg') center/cover; 
-            width: 100vw; height: 100vh; 
-            display: flex; justify-content: center; align-items: center; 
-        }
+        /* วิดีโอหมีหน้าแรก */
+        #idle-bear { position: absolute; bottom: 10%; left: 10%; width: 300px; }
+        #start-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; }
 
-        /* หน้าเล่นเกม */
-        #game-container { 
-            display: none; width: 100vw; height: 100vh; 
-            background: url('assets/BG_Playgame.jpg') center/cover;
-            grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 20px;
-            align-items: center; justify-items: center;
-        }
+        /* หน้าเกม - ปุ่ม Home */
+        #home-btn { position: absolute; top: 20px; right: 20px; width: 80px; cursor: pointer; }
 
-        .card { 
-            width: 100px; height: 100px; cursor: pointer; 
-            object-fit: contain; 
-            background: transparent !important; /* บังคับให้ใส */
-            border: none !important;           /* บังคับไม่ให้มีขอบ */
-        }
-        #timer { position: absolute; top: 20px; left: 20px; color: white; font-size: 30px; z-index: 10; }
+        /* แถบเวลา */
+        #timer-box { position: absolute; top: 20px; left: 50px; width: 400px; height: 50px; display: flex; align-items: center; }
+        #timer-bar { position: relative; width: 300px; height: 20px; }
+        #timer-bg { width: 100%; height: 100%; position: absolute; }
+        #timer-color { width: 100%; height: 100%; background: url('time-bar-color.png'); }
+        #timer-head { width: 50px; margin-left: -20px; }
+
+        /* ตารางการ์ด */
+        #grid { position: absolute; top: 15%; left: 10%; width: 80%; height: 70%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
+        .card { width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="screen">
-        <div id="start-screen">
-            <img src="assets/btn-start.png" onclick="startGame()" style="cursor:pointer; width: 250px;">
+    <div id="start-screen" class="screen">
+        <video id="idle-bear" src="bear-action.mp4" autoplay loop muted></video>
+        <img id="start-btn" src="btn-start.png" onclick="startGame()">
+    </div>
+
+    <div id="game-screen" class="screen">
+        <img id="home-btn" src="btn-home.png" onclick="location.reload()">
+        
+        <div id="timer-box">
+            <div id="timer-bar">
+                <img id="timer-bg" src="time-bar-bg.png">
+                <div id="timer-color"></div>
+            </div>
+            <img id="timer-head" src="bear-timer-head.png">
         </div>
-        <div id="timer" style="display:none;">Time: 60s</div>
-        <div id="game-container"></div>
+
+        <div id="grid"></div>
     </div>
 
     <script>
-        const audio = { bgm: new Audio('assets/soundgame.mp3'), click: new Audio('assets/click.mp3') };
-        let timeLeft = 60, timerInterval, idleTimer;
-
         function startGame() {
             document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-container').style.display = 'grid';
-            document.getElementById('timer').style.display = 'block';
-            audio.bgm.loop = true; audio.bgm.play();
-            resetIdleTimer();
-            createCards();
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer').innerText = `Time: ${timeLeft}s`;
-                if(timeLeft <= 0) { alert('หมดเวลาแล้ว!'); location.reload(); }
+            document.getElementById('game-screen').style.display = 'block';
+            runTimer();
+            initCards();
+        }
+
+        function runTimer() {
+            let time = 60;
+            const bar = document.getElementById('timer-color');
+            const interval = setInterval(() => {
+                time--;
+                bar.style.width = (time / 60 * 100) + '%';
+                if(time <= 0) { clearInterval(interval); alert("หมดเวลา!"); }
             }, 1000);
         }
 
-        function resetIdleTimer() {
-            clearTimeout(idleTimer);
-            idleTimer = setTimeout(() => { window.location.href = 'video.html'; }, 30000);
-        }
-        document.onclick = resetIdleTimer;
-
-        function createCards() {
-            const cardFiles = ['100_biodegradable_1.png', '100_biodegradable_2.png', 'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png', 'biodegradable_plastic_1.png', 'biodegradable_plastic_2.png', 'ceo_addy_1.png', 'ceo_addy_2.png', 'eco-friendly_1.png', 'eco-friendly_2.png', 'ecoplas_1.png', 'ecoplas_2.png', 'handle_bags_1.png', 'handle_bags_2.png', 'nature_x_1.png', 'nature_x_2.png', 'set_cafe_1.png', 'set_cafe_2.png'];
-            const grid = document.getElementById('game-container');
-            grid.innerHTML = ''; // เคลียร์ของเก่าก่อนเริ่ม
-            [...cardFiles].sort(() => Math.random() - 0.5).forEach(file => {
-                const img = document.createElement('img');
-                img.src = 'assets/card_back.png';
-                img.className = 'card';
-                img.onclick = () => { audio.click.play(); img.src = 'assets/' + file; };
-                grid.appendChild(img);
-            });
+        function initCards() {
+            const grid = document.getElementById('grid');
+            for(let i=0; i<18; i++) { // สร้างการ์ด 18 ใบ
+                const card = document.createElement('img');
+                card.src = 'card_back.png';
+                card.className = 'card';
+                grid.appendChild(card);
+            }
         }
     </script>
 </body>
