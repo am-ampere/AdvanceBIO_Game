@@ -2,69 +2,61 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>AdvanceBIO Game</title>
+    <title>AdvanceBIO Memory Game</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        .screen { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; display: none; }
-        
+        .screen { width: 100vw; height: 100vh; position: absolute; background-size: cover; display: none; }
         #start-screen { display: block; background-image: url('assets/BG_First.jpg'); }
         #game-screen { background-image: url('assets/BG_Playgame.jpg'); }
 
-        #start-btn { position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; width: 250px; }
-        #home-btn { position: absolute; top: 20px; right: 20px; width: 70px; cursor: pointer; z-index: 10; }
-        
-        /* แถบเวลา */
-        #timer-container { position: absolute; top: 20px; left: 50px; display: flex; align-items: center; }
-        #timer-bar { width: 300px; height: 25px; background: url('assets/time-bar-bg.png') no-repeat; }
-        #timer-color { width: 100%; height: 25px; background: url('assets/time-bar-color.png') no-repeat; }
-        #timer-head { width: 60px; margin-left: -20px; }
-
-        /* จัดการ์ดให้บาลานซ์ */
-        #grid { position: absolute; top: 20%; left: 10%; width: 80%; height: 60%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-        .card { width: 100%; height: auto; cursor: pointer; }
+        /* UI Elements */
+        #start-btn { position: absolute; top: 60%; left: 50%; transform: translateX(-50%); cursor: pointer; }
+        #home-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; }
+        #timer-box { position: absolute; top: 20px; left: 50px; display: flex; align-items: center; }
+        #grid { position: absolute; top: 15%; left: 10%; width: 80%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
     </style>
 </head>
 <body>
 
     <div id="start-screen" class="screen">
+        <video src="assets/bear-action.mp4" autoplay loop muted style="position:absolute; bottom:5%; left:5%; width:300px;"></video>
         <img id="start-btn" src="assets/btn-start.png" onclick="startGame()">
-        <video id="idle-bear" src="assets/bear-action.mp4" autoplay loop muted style="position:absolute; bottom:5%; left:5%; width:300px;"></video>
     </div>
 
     <div id="game-screen" class="screen">
         <img id="home-btn" src="assets/btn-home.png" onclick="location.reload()">
-        <div id="timer-container">
-            <div id="timer-bar"><div id="timer-color"></div></div>
-            <img id="timer-head" src="assets/bear-timer-head.png">
+        <div id="timer-box">
+            <img src="assets/time-bar-bg.png">
+            <div id="timer-color" style="width:100%; height:20px; background:red;"></div>
+            <img src="assets/bear-timer-head.png">
         </div>
         <div id="grid"></div>
     </div>
 
     <script>
+        const bgm = new Audio('assets/soundgame.mp3');
+
         function startGame() {
+            // 1. เปลี่ยนหน้าจอ
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
-            startTimer();
-            initCards();
+            
+            // 2. เริ่มเพลง (ต้องเริ่มหลัง Interaction)
+            bgm.loop = true;
+            bgm.play();
+
+            // 3. เริ่มเกม
+            initGame();
         }
 
-        function startTimer() {
-            let width = 100;
-            const bar = document.getElementById('timer-color');
-            const interval = setInterval(() => {
-                width -= (100 / 60); // ลดเวลา 60 วินาที
-                bar.style.width = width + "%";
-                if(width <= 0) { clearInterval(interval); alert("หมดเวลา!"); }
-            }, 1000);
-        }
-
-        function initCards() {
+        function initGame() {
             const grid = document.getElementById('grid');
+            grid.innerHTML = ''; 
             for(let i=0; i<18; i++) {
-                const img = document.createElement('img');
-                img.src = 'assets/card_back.png';
-                img.className = 'card';
-                grid.appendChild(img);
+                const card = document.createElement('img');
+                card.src = 'assets/card_back.png';
+                card.className = 'card';
+                grid.appendChild(card);
             }
         }
     </script>
