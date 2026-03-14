@@ -5,9 +5,35 @@
     <title>AdvanceBIO Memory Game</title>
     <style>
         body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        #game-container { width: 100vw; height: 100vh; background: url('assets/BG_Playgame.jpg') no-repeat center/cover; position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; padding: 50px; justify-items: center; }
-        .card { width: 120px; height: 120px; cursor: pointer; border-radius: 10px; transition: transform 0.3s; position: relative; }
-        .aura { position: absolute; width: 140px; height: 140px; pointer-events: none; }
+        
+        #game-container { 
+            width: 90vw; 
+            height: 85vh; 
+            background: url('assets/BG_Playgame.jpg') no-repeat center/cover; 
+            position: relative; 
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 1.5vh; 
+            padding: 2vw; 
+            justify-items: center; 
+            align-items: center;
+        }
+
+        .card { 
+            width: 10vw; 
+            max-width: 120px; 
+            aspect-ratio: 1 / 1; 
+            cursor: pointer; 
+            border-radius: 10px; 
+            transition: transform 0.3s; 
+        }
+
+        .aura { 
+            position: absolute; 
+            width: 12vw; 
+            max-width: 140px; 
+            pointer-events: none; 
+        }
     </style>
 </head>
 <body>
@@ -21,8 +47,7 @@
             bgm: new Audio('assets/soundgame.mp3')
         };
         audio.bgm.loop = true;
-        // ปิด auto-play เพลงประกอบไว้ก่อนเพื่อป้องกัน Browser บล็อก
-        
+
         const cardFiles = [
             '100_biodegradable_1.png', '100_biodegradable_2.png',
             'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png',
@@ -41,7 +66,7 @@
 
         cardFiles.sort(() => Math.random() - 0.5).forEach(file => {
             const card = document.createElement('img');
-            card.src = 'assets/card_back.png'; // แก้ไขตรงนี้แล้ว!
+            card.src = 'assets/card_back.png';
             card.dataset.front = 'assets/' + file;
             card.className = 'card';
             
@@ -97,7 +122,6 @@
         document.onclick = () => { 
             clearInterval(idle); 
             idle = setInterval(() => { window.location.href = 'video.html'; }, 120000); 
-            // ลองเริ่มเล่นเพลงประกอบเมื่อมีการคลิกครั้งแรก
             if (audio.bgm.paused) audio.bgm.play();
         };
     </script>
