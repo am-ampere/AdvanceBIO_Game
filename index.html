@@ -4,34 +4,36 @@
     <meta charset="UTF-8">
     <title>AdvanceBIO Memory Game</title>
     <style>
+        /* จัดหน้าจอให้เป็นสีดำและวางทุกอย่างไว้ตรงกลาง */
         body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
         #game-container { 
             width: 90vw; 
             height: 85vh; 
             background: url('assets/BG_Playgame.jpg') no-repeat center/cover; 
-            position: relative; 
             display: grid; 
             grid-template-columns: repeat(6, 1fr); 
-            gap: 1.5vh; 
-            padding: 2vw; 
+            gap: 10px; 
+            padding: 20px; 
             justify-items: center; 
             align-items: center;
         }
 
         .card { 
-            width: 10vw; 
+            width: 100%; 
             max-width: 120px; 
             aspect-ratio: 1 / 1; 
             cursor: pointer; 
             border-radius: 10px; 
             transition: transform 0.3s; 
+            object-fit: contain; /* ปรับรูปให้พอดีกรอบ ไม่ยืดไม่เบี้ยว */
+            background-color: white; 
         }
 
         .aura { 
             position: absolute; 
-            width: 12vw; 
-            max-width: 140px; 
+            width: 120px; 
+            height: 120px; 
             pointer-events: none; 
         }
     </style>
@@ -114,8 +116,8 @@
             aura.src = imgPath;
             aura.className = 'aura';
             card.parentNode.appendChild(aura);
-            aura.style.left = card.offsetLeft - 10 + 'px';
-            aura.style.top = card.offsetTop - 10 + 'px';
+            aura.style.left = card.offsetLeft + 'px';
+            aura.style.top = card.offsetTop + 'px';
         }
 
         let idle = setInterval(() => { window.location.href = 'video.html'; }, 120000);
