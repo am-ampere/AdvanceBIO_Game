@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <title>AdvanceBIO Memory Game</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        
+        body { margin: 0; background: #000; overflow: hidden; }
         #screen { width: 100vw; height: 100vh; position: relative; }
-        
-        /* หน้าเมนูเริ่มเกม */
+
+        /* หน้า Start */
         #start-screen { 
             background: url('assets/BG_start.jpg') center/cover; 
-            width: 100%; height: 100%; 
+            width: 100vw; height: 100vh; 
             display: flex; justify-content: center; align-items: center; 
         }
 
@@ -20,8 +19,14 @@
             display: none; width: 100vw; height: 100vh; 
             background: url('assets/BG_Playgame.jpg') center/cover;
             grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 20px;
+            align-items: center; justify-items: center;
         }
-        .card { width: 100px; height: 100px; cursor: pointer; object-fit: contain; background: white; }
+
+        /* ปรับการ์ด: เอาพื้นหลังขาวออกและจัดให้พอดี */
+        .card { 
+            width: 100px; height: 100px; cursor: pointer; 
+            object-fit: contain; /* โชว์รูปให้เต็มโดยไม่ยืด */
+        }
         #timer { position: absolute; top: 20px; left: 20px; color: white; font-size: 30px; z-index: 10; }
     </style>
 </head>
@@ -29,7 +34,7 @@
 
     <div id="screen">
         <div id="start-screen">
-            <img src="assets/btn-start.png" alt="Start Game" onclick="startGame()" style="cursor:pointer; width: 250px;">
+            <img src="assets/btn-start.png" onclick="startGame()" style="cursor:pointer; width: 250px;">
         </div>
 
         <div id="timer" style="display:none;">Time: 60s</div>
@@ -38,45 +43,33 @@
 
     <script>
         const audio = { bgm: new Audio('assets/soundgame.mp3'), click: new Audio('assets/click.mp3') };
-        let timeLeft = 60;
-        let timerInterval;
+        let timeLeft = 60, timerInterval, idleTimer;
 
         function startGame() {
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-container').style.display = 'grid';
             document.getElementById('timer').style.display = 'block';
-
-            audio.bgm.loop = true;
-            audio.bgm.play();
-
+            audio.bgm.loop = true; audio.bgm.play();
+            resetIdleTimer();
+            createCards();
             timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = `Time: ${timeLeft}s`;
-                if(timeLeft <= 0) { clearInterval(timerInterval); alert('Game Over!'); location.reload(); }
+                if(timeLeft <= 0) { alert('Game Over!'); location.reload(); }
             }, 1000);
-
-            createCards();
         }
 
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => { window.location.href = 'video.html'; }, 30000); // ถ้าไม่ขยับ 30 วิ กลับไปหน้าหมี
+        }
+
+        document.onclick = resetIdleTimer; // ทุกครั้งที่คลิก ให้รีเซ็ตเวลา Idle
+
         function createCards() {
-            // รายชื่อไฟล์การ์ดของคุณ
-            const cardFiles = [
-                '100_biodegradable_1.png', '100_biodegradable_2.png',
-                'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png',
-                'biodegradable_plastic_1.png', 'biodegradable_plastic_2.png',
-                'ceo_addy_1.png', 'ceo_addy_2.png',
-                'eco-friendly_1.png', 'eco-friendly_2.png',
-                'ecoplas_1.png', 'ecoplas_2.png',
-                'handle_bags_1.png', 'handle_bags_2.png',
-                'nature_x_1.png', 'nature_x_2.png',
-                'set_cafe_1.png', 'set_cafe_2.png'
-            ];
-            
-            // สับไพ่
-            const shuffled = [...cardFiles].sort(() => Math.random() - 0.5);
+            const cardFiles = ['100_biodegradable_1.png', '100_biodegradable_2.png', 'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png', 'biodegradable_plastic_1.png', 'biodegradable_plastic_2.png', 'ceo_addy_1.png', 'ceo_addy_2.png', 'eco-friendly_1.png', 'eco-friendly_2.png', 'ecoplas_1.png', 'ecoplas_2.png', 'handle_bags_1.png', 'handle_bags_2.png', 'nature_x_1.png', 'nature_x_2.png', 'set_cafe_1.png', 'set_cafe_2.png'];
             const grid = document.getElementById('game-container');
-            
-            shuffled.forEach(file => {
+            [...cardFiles].sort(() => Math.random() - 0.5).forEach(file => {
                 const img = document.createElement('img');
                 img.src = 'assets/card_back.png';
                 img.className = 'card';
