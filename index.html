@@ -4,128 +4,70 @@
     <meta charset="UTF-8">
     <title>AdvanceBIO Memory Game</title>
     <style>
-        /* จัดหน้าจอให้เป็นสีดำและวางทุกอย่างไว้ตรงกลาง */
         body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #screen { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; position: relative; }
         
-        #game-container { 
-            width: 90vw; 
-            height: 85vh; 
-            background: url('assets/BG_Playgame.jpg') no-repeat center/cover; 
-            display: grid; 
-            grid-template-columns: repeat(6, 1fr); 
-            gap: 10px; 
-            padding: 20px; 
-            justify-items: center; 
-            align-items: center;
-        }
+        /* หน้าเมนูเริ่มเกม */
+        #start-screen { background: url('assets/BG_Playgame.jpg') center/cover; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        button { padding: 20px 40px; font-size: 24px; cursor: pointer; }
 
-        .card { 
-            width: 100%; 
-            max-width: 120px; 
-            aspect-ratio: 1 / 1; 
-            cursor: pointer; 
-            border-radius: 10px; 
-            transition: transform 0.3s; 
-            object-fit: contain; /* ปรับรูปให้พอดีกรอบ ไม่ยืดไม่เบี้ยว */
-            background-color: white; 
-        }
-
-        .aura { 
-            position: absolute; 
-            width: 120px; 
-            height: 120px; 
-            pointer-events: none; 
-        }
+        /* หน้าเล่นเกม */
+        #game-container { display: none; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        .card { width: 100px; height: 100px; cursor: pointer; object-fit: contain; background: white; }
+        
+        #timer { position: absolute; top: 20px; left: 20px; color: white; font-size: 30px; }
     </style>
 </head>
 <body>
-    <div id="game-container"></div>
+
+    <div id="screen">
+        <div id="start-screen">
+            <h1>AdvanceBIO Memory Game</h1>
+            <button onclick="startGame()">START GAME</button>
+        </div>
+
+        <div id="timer" style="display:none;">Time: 60s</div>
+        <div id="game-container"></div>
+    </div>
 
     <script>
-        const audio = {
-            click: new Audio('assets/click.mp3'),
-            correct: new Audio('assets/correct.mp3'),
-            wrong: new Audio('assets/wrong.mp3'),
-            bgm: new Audio('assets/soundgame.mp3')
-        };
-        audio.bgm.loop = true;
+        const audio = { bgm: new Audio('assets/soundgame.mp3'), click: new Audio('assets/click.mp3') };
+        let timeLeft = 60;
+        let timerInterval;
 
-        const cardFiles = [
-            '100_biodegradable_1.png', '100_biodegradable_2.png',
-            'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png',
-            'biodegradable_plastic_1.png', 'biodegradable_plastic_2.png',
-            'ceo_addy_1.png', 'ceo_addy_2.png',
-            'eco-friendly_1.png', 'eco-friendly_2.png',
-            'ecoplas_1.png', 'ecoplas_2.png',
-            'handle_bags_1.png', 'handle_bags_2.png',
-            'nature_x_1.png', 'nature_x_2.png',
-            'set_cafe_1.png', 'set_cafe_2.png'
-        ];
+        function startGame() {
+            // 1. สลับหน้าจอ
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'grid';
+            document.getElementById('timer').style.display = 'block';
 
-        const grid = document.getElementById('game-container');
-        let flippedCards = [];
-        let canClick = true;
+            // 2. เริ่มเสียง
+            audio.bgm.loop = true;
+            audio.bgm.play();
 
-        cardFiles.sort(() => Math.random() - 0.5).forEach(file => {
-            const card = document.createElement('img');
-            card.src = 'assets/card_back.png';
-            card.dataset.front = 'assets/' + file;
-            card.className = 'card';
-            
-            card.onclick = () => {
-                if (!canClick || flippedCards.includes(card)) return;
-                audio.click.play();
-                card.src = card.dataset.front;
-                flippedCards.push(card);
+            // 3. เริ่มจับเวลา
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = `Time: ${timeLeft}s`;
+                if(timeLeft <= 0) { clearInterval(timerInterval); alert('Game Over!'); location.reload(); }
+            }, 1000);
 
-                if (flippedCards.length === 2) {
-                    canClick = false;
-                    checkMatch();
-                }
-            };
-            grid.appendChild(card);
-        });
-
-        function checkMatch() {
-            const [c1, c2] = flippedCards;
-            const name1 = c1.dataset.front.split('_').slice(0,-1).join('_');
-            const name2 = c2.dataset.front.split('_').slice(0,-1).join('_');
-
-            if (name1 === name2) {
-                audio.correct.play();
-                addAura(c1, 'assets/aura-correct.png');
-                addAura(c2, 'assets/aura-correct.png');
-                flippedCards = [];
-                canClick = true;
-            } else {
-                audio.wrong.play();
-                addAura(c1, 'assets/aura-wrong.png');
-                addAura(c2, 'assets/aura-wrong.png');
-                setTimeout(() => {
-                    c1.src = 'assets/card_back.png';
-                    c2.src = 'assets/card_back.png';
-                    document.querySelectorAll('.aura').forEach(e => e.remove());
-                    flippedCards = [];
-                    canClick = true;
-                }, 1000);
-            }
+            // 4. สร้างและสับการ์ด
+            createCards();
         }
 
-        function addAura(card, imgPath) {
-            const aura = document.createElement('img');
-            aura.src = imgPath;
-            aura.className = 'aura';
-            card.parentNode.appendChild(aura);
-            aura.style.left = card.offsetLeft + 'px';
-            aura.style.top = card.offsetTop + 'px';
+        function createCards() {
+            const cardFiles = ['1.png', '1.png', '2.png', '2.png']; // ใส่ชื่อไฟล์ทั้งหมดของคุณที่นี่
+            cardFiles.sort(() => Math.random() - 0.5);
+            const grid = document.getElementById('game-container');
+            cardFiles.forEach(file => {
+                const img = document.createElement('img');
+                img.src = 'assets/card_back.png';
+                img.className = 'card';
+                img.onclick = () => { audio.click.play(); img.src = 'assets/' + file; };
+                grid.appendChild(img);
+            });
         }
-
-        let idle = setInterval(() => { window.location.href = 'video.html'; }, 120000);
-        document.onclick = () => { 
-            clearInterval(idle); 
-            idle = setInterval(() => { window.location.href = 'video.html'; }, 120000); 
-            if (audio.bgm.paused) audio.bgm.play();
-        };
     </script>
 </body>
 </html>
