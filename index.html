@@ -2,46 +2,38 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>AdvanceBIO Matching Game</title>
+    <title>AdvanceBIO Memory Game</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { width: 100vw; height: 100vh; overflow: hidden; background: #000; }
         .screen { position: absolute; width: 100vw; height: 100vh; background-size: cover; background-position: center; display: none; }
-
-        /* หน้า 1 */
+        
+        /* หน้า 1: Idle */
         #screen-1 { display: block; background-image: url('assets/BG_First.jpg'); }
-        #btn-start { position: absolute; top: 60vh; left: 50vw; transform: translateX(-50%); width: 15vw; cursor: pointer; }
+        #btn-start { position: absolute; top: 65vh; left: 50vw; transform: translateX(-50%); width: 18vw; cursor: pointer; }
 
-        /* หน้า 2 */
-        #screen-2 { background-image: url('assets/BG_start.jpg'); }
-        #txt-gamestart { position: absolute; top: 50vh; left: 50vw; transform: translate(-50%, -50%); width: 30vw; display: none; }
-
-        /* หน้า 3 */
+        /* หน้า 3: Play */
         #screen-3 { background-image: url('assets/BG_Playgame.jpg'); }
         #btn-home { position: absolute; top: 3vh; right: 3vw; width: 5vw; z-index: 20; cursor: pointer; }
-        #bear-video { position: absolute; bottom: 2vh; right: 2vw; width: 15vw; height: 15vw; object-fit: cover; }
+        #bear-video { position: absolute; bottom: 2vh; right: 2vw; width: 18vw; object-fit: cover; }
         
-        /* แก้ปัญหาเวลาไม่ซ้อนกัน */
-        #timer-box { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 5vh; display: flex; align-items: center; }
-        #time-bar-bg { position: absolute; width: 100%; height: 100%; }
-        #time-bar-color { position: absolute; height: 60%; left: 0; background: url('assets/time-bar-color.png'); background-size: cover; z-index: 1; }
-        #bear-timer-head { position: absolute; height: 120%; z-index: 2; margin-left: -2vw; }
+        /* แถบเวลา: แก้ไขให้ซ้อนกัน */
+        #timer-box { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 6vh; display: flex; align-items: center; }
+        #time-bar-bg { position: absolute; width: 100%; z-index: 1; }
+        #time-bar-color { position: absolute; left: 0; height: 60%; width: 100%; background: url('assets/time-bar-color.png'); background-size: 100% 100%; z-index: 2; transition: width 0.1s; }
+        #bear-timer-head { position: absolute; height: 120%; z-index: 3; left: 100%; transition: left 0.1s; }
 
-        /* แก้ไขออร่าให้พอดีการ์ด */
+        /* การ์ดและออร่า */
         #grid { position: absolute; top: 20vh; left: 10vw; width: 80vw; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1vw; }
         .card-container { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; }
         .card-img { width: 100%; height: 100%; object-fit: contain; }
-        .aura { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 5; }
+        .aura { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <div id="screen-1" class="screen">
-        <img id="btn-start" src="assets/btn-start.png" onclick="startFlow()">
-    </div>
-
-    <div id="screen-2" class="screen">
-        <img id="txt-gamestart" src="assets/txt-gamestart.png">
+        <img id="btn-start" src="assets/btn-start.png" onclick="startGame()">
     </div>
 
     <div id="screen-3" class="screen">
@@ -57,26 +49,20 @@
     </div>
 
     <script>
+        // แก้ไขชื่อไฟล์เสียงให้ตรงตามชื่อจริงที่คุณบอกครับ
         const sfx = {
-            bgm: new Audio('assets/soundgame.mp3'),
-            click: new Audio('assets/click.mp3'),
-            flip: new Audio('assets/flip.mp3'),
-            correct: new Audio('assets/correct.mp3'),
-            wrong: new Audio('assets/wrong.mp3')
+            bgm: new Audio('assets/sound game.mp3'),
+            click: new Audio('assets/click.mp3')
         };
-        sfx.bgm.loop = true;
 
-        function startFlow() {
+        function startGame() {
             sfx.click.play();
-            sfx.bgm.play();
+            sfx.bgm.loop = true;
+            sfx.bgm.play().catch(e => console.log("รอการคลิกก่อนเริ่มเสียง"));
+            
             document.getElementById('screen-1').style.display = 'none';
-            document.getElementById('screen-2').style.display = 'block';
-            document.getElementById('txt-gamestart').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('screen-2').style.display = 'none';
-                document.getElementById('screen-3').style.display = 'block';
-                setupGame();
-            }, 2000);
+            document.getElementById('screen-3').style.display = 'block';
+            setupGame();
         }
 
         function setupGame() {
@@ -85,6 +71,7 @@
             for(let i=0; i<18; i++) {
                 const div = document.createElement('div');
                 div.className = 'card-container';
+                // ใช้ card_back.png ตามที่คุณบอก
                 div.innerHTML = `<img src="assets/card_back.png" class="card-img">`;
                 grid.appendChild(div);
             }
