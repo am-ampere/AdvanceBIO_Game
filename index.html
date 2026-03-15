@@ -100,7 +100,6 @@
             width: 17vw;
             z-index: 5;
             background: transparent;
-            mix-blend-mode: multiply;
         }
 
         /* ===== TIMER ===== */
@@ -467,8 +466,7 @@ function setupGame() {
             <div class="card-inner">
                 <img src="assets/${data.img}" class="card-front" alt="card front">
                 <img src="assets/back-card-start.png" class="card-back" alt="card back">
-                <img src="assets/aura-correct.png" class="aura aura-correct" alt="">
-                <img src="assets/aura-wrong.png"   class="aura aura-wrong"   alt="">
+                <img src="assets/aura-wrong.png" class="aura aura-wrong" alt="">
             </div>
         `;
         container.addEventListener('click', () => onCardClick(container));
@@ -543,13 +541,6 @@ function checkMatch() {
     if (id1 === id2) {
         // ✅ ถูก
         playSound('correct');
-        // แสดง aura-correct ชั่วคราว แล้วค่อยซ่อน
-        c1.querySelector('.aura-correct').style.opacity = 1;
-        c2.querySelector('.aura-correct').style.opacity = 1;
-        setTimeout(() => {
-            c1.querySelector('.aura-correct').style.opacity = 0;
-            c2.querySelector('.aura-correct').style.opacity = 0;
-        }, 800);
         c1.classList.add('matched');
         c2.classList.add('matched');
         matchedPairs++;
