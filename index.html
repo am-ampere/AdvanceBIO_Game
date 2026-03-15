@@ -252,7 +252,7 @@
 <!-- ===== SCREEN 3: PLAY ===== -->
 <div id="screen-3" class="screen">
     <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
-    <video id="bear-action-play" src="assets/bear-action.mp4" loop muted playsinline></video>
+    <video id="bear-action-play" src="assets/bear-action.webm" type="video/webm" loop muted playsinline></video>
 
     <div id="timer-container">
         <img id="time-bar-bg" src="assets/time-bar-bg.png" alt="">
@@ -543,8 +543,13 @@ function checkMatch() {
     if (id1 === id2) {
         // ✅ ถูก
         playSound('correct');
+        // แสดง aura-correct ชั่วคราว แล้วค่อยซ่อน
         c1.querySelector('.aura-correct').style.opacity = 1;
         c2.querySelector('.aura-correct').style.opacity = 1;
+        setTimeout(() => {
+            c1.querySelector('.aura-correct').style.opacity = 0;
+            c2.querySelector('.aura-correct').style.opacity = 0;
+        }, 800);
         c1.classList.add('matched');
         c2.classList.add('matched');
         matchedPairs++;
