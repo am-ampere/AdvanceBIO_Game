@@ -51,15 +51,27 @@
         #screen-2 {
             background-image: url('assets/BG_start.jpg');
         }
-        #start-card-show {
+        #start-card-grid {
             position: absolute;
-            top: 50%;
+            top: 14vh;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70vw;
+            transform: translateX(-50%);
+            width: 55vw;
+            height: 78vh;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 1vw;
             opacity: 0;
             transition: opacity 0.5s ease;
             z-index: 5;
+        }
+        #start-card-grid.visible { opacity: 1; }
+        #start-card-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
         }
         #txt-gamestart {
             position: absolute;
@@ -246,7 +258,21 @@
 
 <!-- ===== SCREEN 2: START ===== -->
 <div id="screen-2" class="screen">
-    <img id="start-card-show" src="assets/back-card-start.png" alt="Card Back">
+    <div id="start-card-grid">
+        <!-- 12 ใบ สำหรับ 4x3 grid -->
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+        <img src="assets/card_back.png" alt="">
+    </div>
     <img id="txt-gamestart" src="assets/txt-gamestart.png" alt="Game Start">
 </div>
 
@@ -352,15 +378,15 @@ function goToStartScreen() {
 }
 
 function runStartAnimation() {
-    const cardEl  = document.getElementById('start-card-show');
-    const txtEl   = document.getElementById('txt-gamestart');
+    const gridEl = document.getElementById('start-card-grid');
+    const txtEl  = document.getElementById('txt-gamestart');
     txtEl.style.display = 'block';
     txtEl.classList.remove('pop');
 
-    // 1) fade in การ์ดหลัง
-    cardEl.style.opacity = '0';
+    // 1) fade in กริดการ์ดหลัง
+    gridEl.classList.remove('visible');
     setTimeout(() => {
-        cardEl.style.opacity = '1';
+        gridEl.classList.add('visible');
     }, 100);
 
     // 2) หลัง 1.2s → pop txt-gamestart
@@ -394,10 +420,11 @@ function goHome() {
     bgm.volume = 0.6;
     if (bgm.paused) bgm.play();
 
-    // reset txt-gamestart
+    // reset screen-2
     const txtEl = document.getElementById('txt-gamestart');
     txtEl.style.display = 'none';
     txtEl.classList.remove('pop');
+    document.getElementById('start-card-grid').classList.remove('visible');
 
     showScreen('screen-1');
 }
@@ -422,7 +449,7 @@ const cardData = [
     { id: 3, img1: 'ceo_addy_1.png',                  img2: 'ceo_addy_2.png'                  },
     { id: 4, img1: 'ecoplas_1.png',                    img2: 'ecoplas_2.png'                   },
     { id: 5, img1: 'nature_x_1.png',                   img2: 'nature_x_2.png'                  },
-    { id: 6, img1: 'eco-friendly_1.png',                   img2: 'eco-friendly_2.png'                  },
+    { id: 6, img1: 'eco-friendly_1.png',               img2: 'eco-friendly_2.png'              },
 ];
 
 // ===================================================
