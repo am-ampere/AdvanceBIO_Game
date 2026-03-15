@@ -92,15 +92,7 @@
         .btn-home:hover { transform: scale(1.05); filter: brightness(1.1); }
         .btn-home:active { transform: scale(0.95); }
 
-        /* Bear action video */
-        #bear-action-play {
-            position: absolute;
-            bottom: 1vh;
-            right: 1vw;
-            width: 17vw;
-            z-index: 5;
-            background: transparent;
-        }
+
 
         /* ===== TIMER ===== */
         #timer-container {
@@ -185,10 +177,16 @@
             -webkit-backface-visibility: hidden;
             border-radius: 8px;
             object-fit: contain;
+            top: 0;
+            left: 0;
         }
 
         .card-front {
             transform: rotateY(180deg);
+        }
+
+        .card-back {
+            transform: rotateY(0deg);
         }
 
         /* Aura overlay */
@@ -251,7 +249,6 @@
 <!-- ===== SCREEN 3: PLAY ===== -->
 <div id="screen-3" class="screen">
     <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
-    <video id="bear-action-play" src="assets/bear-action.webm" type="video/webm" loop muted playsinline></video>
 
     <div id="timer-container">
         <img id="time-bar-bg" src="assets/time-bar-bg.png" alt="">
@@ -377,8 +374,7 @@ function runStartAnimation() {
 // ===================================================
 function goToPlayScreen() {
     showScreen('screen-3', () => {
-        bgm.volume = 0.25; // fade down BGM
-        document.getElementById('bear-action-play').play();
+        bgm.volume = 0.25;
         setupGame();
     });
 }
@@ -591,27 +587,14 @@ function startTimer() {
 function endGame(win) {
     gameActive = false;
     clearInterval(timerInterval);
-
-    // หยุด BGM ก่อน
     bgm.pause();
 
     if (win) {
-        showScreen('screen-win', () => {
-            playSound('win');
-            // หลังเสียง win จบ → กลับเล่น BGM
-            sfx.win.addEventListener('ended', () => {
-                bgm.volume = 0.6;
-                bgm.play();
-            }, { once: true });
-        });
+        playSound('win');
+        setTimeout(() => showScreen('screen-win'), 500);
     } else {
-        showScreen('screen-lose', () => {
-            playSound('lose');
-            sfx.lose.addEventListener('ended', () => {
-                bgm.volume = 0.6;
-                bgm.play();
-            }, { once: true });
-        });
+        playSound('lose');
+        setTimeout(() => showScreen('screen-lose'), 500);
     }
 }
 </script>
