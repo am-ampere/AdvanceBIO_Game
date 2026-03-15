@@ -2,259 +2,93 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>AdvanceBIO Memory Game - Production</title>
+    <title>AdvanceBIO Matching Game</title>
     <style>
-        * { box-sizing: border-box; }
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: sans-serif; background: #000; }
-        
-        .screen { 
-            position: absolute; width: 100vw; height: 100vh; 
-            background-size: 100% 100%; background-repeat: no-repeat; 
-            display: none; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+        .screen { position: absolute; width: 100vw; height: 100vh; background-size: cover; background-position: center; display: none; }
 
-        /* หน้าที่ 1: Idle */
+        /* หน้า 1 */
         #screen-1 { display: block; background-image: url('assets/BG_First.jpg'); }
-        #btn-start { 
-            position: absolute; top: 65vh; left: 50vw; transform: translate(-50%, -50%); 
-            width: 18vw; cursor: pointer; transition: transform 0.2s; 
-        }
+        #btn-start { position: absolute; top: 60vh; left: 50vw; transform: translateX(-50%); width: 15vw; cursor: pointer; }
 
-        /* หน้าที่ 2: Start Animation */
+        /* หน้า 2 */
         #screen-2 { background-image: url('assets/BG_start.jpg'); }
-        #start-card-show { position: absolute; top: 50vh; left: 50vw; transform: translate(-50%, -50%); width: 15vw; }
-        #txt-gamestart { position: absolute; top: 50vh; left: 50vw; transform: translate(-50%, -50%); width: 40vw; z-index: 10; display: none; }
+        #txt-gamestart { position: absolute; top: 50vh; left: 50vw; transform: translate(-50%, -50%); width: 30vw; display: none; }
 
-        /* หน้าที่ 3: Play Game */
+        /* หน้า 3 */
         #screen-3 { background-image: url('assets/BG_Playgame.jpg'); }
-        #btn-home { position: absolute; top: 3vh; right: 3vw; width: 5vw; cursor: pointer; z-index: 20; }
-        #bear-action-play { position: absolute; bottom: 2vh; right: 2vw; width: 18vw; }
+        #btn-home { position: absolute; top: 3vh; right: 3vw; width: 5vw; z-index: 20; cursor: pointer; }
+        #bear-video { position: absolute; bottom: 2vh; right: 2vw; width: 15vw; height: 15vw; object-fit: cover; }
         
-        /* หลอดเวลา */
-        #timer-container { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 6vh; }
-        #time-bar-bg { width: 100%; position: absolute; top: 0; }
-        #time-bar-color { width: 100%; height: 60%; position: absolute; top: 20%; left: 0; background: url('assets/time-bar-color.png'); background-size: cover; transition: width 0.1s linear; }
-        #bear-timer-head { position: absolute; top: -1vh; height: 8vh; transform: translateX(-50%); }
+        /* แก้ปัญหาเวลาไม่ซ้อนกัน */
+        #timer-box { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 5vh; display: flex; align-items: center; }
+        #time-bar-bg { position: absolute; width: 100%; height: 100%; }
+        #time-bar-color { position: absolute; height: 60%; left: 0; background: url('assets/time-bar-color.png'); background-size: cover; z-index: 1; }
+        #bear-timer-head { position: absolute; height: 120%; z-index: 2; margin-left: -2vw; }
 
-        /* การ์ด */
-        #grid { 
-            position: absolute; top: 22vh; left: 50vw; transform: translateX(-50%); 
-            width: 75vw; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.5vh; 
-        }
-        .card-container { perspective: 1000px; aspect-ratio: 1/1; cursor: pointer; position: relative; }
-        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flipped .card-inner { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; }
-        .card-front { transform: rotateY(180deg); object-fit: contain; }
-        .card-back { object-fit: contain; }
-
-        /* Aura */
-        .aura { position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; pointer-events: none; opacity: 0; }
-
-        /* หน้าสรุปผล */
-        #screen-win { background-image: url('assets/BG_Win.jpg'); }
-        #screen-lose { background-image: url('assets/BG_Lose.jpg'); }
+        /* แก้ไขออร่าให้พอดีการ์ด */
+        #grid { position: absolute; top: 20vh; left: 10vw; width: 80vw; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1vw; }
+        .card-container { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; }
+        .card-img { width: 100%; height: 100%; object-fit: contain; }
+        .aura { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 5; }
     </style>
 </head>
 <body>
 
     <div id="screen-1" class="screen">
-        <img id="btn-start" src="assets/btn-start.png" onclick="goToStartScreen()">
+        <img id="btn-start" src="assets/btn-start.png" onclick="startFlow()">
     </div>
 
     <div id="screen-2" class="screen">
-        <img id="start-card-show" src="assets/back-card-start.png">
         <img id="txt-gamestart" src="assets/txt-gamestart.png">
     </div>
 
     <div id="screen-3" class="screen">
         <img id="btn-home" src="assets/btn-home.png" onclick="location.reload()">
-        <video id="bear-action-play" src="assets/bear-action.mp4" loop muted></video>
+        <video id="bear-video" src="assets/bear-action.mp4" loop muted autoplay></video>
         
-        <div id="timer-container">
+        <div id="timer-box">
             <img id="time-bar-bg" src="assets/time-bar-bg.png">
             <div id="time-bar-color"></div>
-            <img id="bear-timer-head" src="assets/bear-timer-head.png" style="left: 100%;">
+            <img id="bear-timer-head" src="assets/bear-timer-head.png">
         </div>
-
         <div id="grid"></div>
     </div>
 
-    <div id="screen-win" class="screen"><img class="btn-home-win" src="assets/btn-home.png" onclick="location.reload()" style="position:absolute; top:3vh; right:3vw; width:5vw; cursor:pointer;"></div>
-    <div id="screen-lose" class="screen"><img class="btn-home-lose" src="assets/btn-home.png" onclick="location.reload()" style="position:absolute; top:3vh; right:3vw; width:5vw; cursor:pointer;"></div>
-
     <script>
-        // เสียงทั้งหมด
         const sfx = {
             bgm: new Audio('assets/soundgame.mp3'),
             click: new Audio('assets/click.mp3'),
-            flip: new Audio('assets/flip.mp3'), // สมมติว่าเป็น mp3 นะครับ ตามปกติไฟล์เสียง
+            flip: new Audio('assets/flip.mp3'),
             correct: new Audio('assets/correct.mp3'),
-            wrong: new Audio('assets/wrong.mp3'),
-            win: new Audio('assets/win.mp3'),
-            lose: new Audio('assets/lose.mp3')
+            wrong: new Audio('assets/wrong.mp3')
         };
         sfx.bgm.loop = true;
 
-        let gameActive = false;
-        let timeLeft = 60;
-        let timerInterval;
-        let flippedCards = [];
-        let matchedPairs = 0;
-        let idleTimer;
-
-        // ฟังก์ชันเริ่มหน้า 2
-        function goToStartScreen() {
+        function startFlow() {
             sfx.click.play();
             sfx.bgm.play();
-            showScreen('screen-2');
-            
+            document.getElementById('screen-1').style.display = 'none';
+            document.getElementById('screen-2').style.display = 'block';
+            document.getElementById('txt-gamestart').style.display = 'block';
             setTimeout(() => {
-                document.getElementById('txt-gamestart').style.display = 'block';
-                setTimeout(goToPlayScreen, 2000); // แสดงข้อความ 2 วิแล้วไปหน้าเกม
-            }, 500);
+                document.getElementById('screen-2').style.display = 'none';
+                document.getElementById('screen-3').style.display = 'block';
+                setupGame();
+            }, 2000);
         }
-
-        // ฟังก์ชันเข้าหน้าเกม
-        function goToPlayScreen() {
-            showScreen('screen-3');
-            document.getElementById('bear-action-play').play();
-            sfx.bgm.volume = 0.3; // เฟดเสียงเพลงลง
-            setupGame();
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-            document.getElementById(id).style.display = 'block';
-            resetIdleTimer();
-        }
-
-        // จัดการเรื่องการ์ด
-        const cardData = [
-            { id: 1, img: '100_biodegradable_1.png' }, { id: 1, img: '100_biodegradable_2.png' },
-            { id: 2, img: 'biodegradable_handle_bags_1.png' }, { id: 2, img: 'biodegradable_handle_bags_2.png' },
-            { id: 3, img: 'biodegradable_plastic_1.png' }, { id: 3, img: 'biodegradable_plastic_2.png' },
-            { id: 4, img: 'ceo_addy_1.png' }, { id: 4, img: 'ceo_addy_2.png' },
-            { id: 5, img: 'eco-friendly_1.png' }, { id: 5, img: 'eco-friendly_2.png' },
-            { id: 6, img: 'ecoplas_1.png' }, { id: 6, img: 'ecoplas_2.png' },
-            { id: 7, img: 'handle_bags_1.png' }, { id: 7, img: 'handle_bags_2.png' },
-            { id: 8, img: 'nature_x_1.png' }, { id: 8, img: 'nature_x_2.png' },
-            { id: 9, img: 'set_cafe_1.png' }, { id: 9, img: 'set_cafe_2.png' }
-        ];
 
         function setupGame() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            const shuffled = [...cardData].sort(() => Math.random() - 0.5);
-            
-            shuffled.forEach((data, index) => {
-                const container = document.createElement('div');
-                container.className = 'card-container';
-                container.innerHTML = `
-                    <div class="card-inner" id="card-${index}">
-                        <img src="assets/${data.img}" class="card-front">
-                        <img src="assets/back-card-start.png" class="card-back">
-                        <img src="assets/aura-correct.png" class="aura aura-correct">
-                        <img src="assets/aura-wrong.png" class="aura aura-wrong">
-                    </div>
-                `;
-                container.onclick = () => flipCard(index, data.id);
-                grid.appendChild(container);
-            });
-
-            // Sequence: โชว์หน้าการ์ด 2 วิ -> สลับ (จำลอง) -> พลิกกลับ
-            setTimeout(() => {
-                document.querySelectorAll('.card-inner').forEach(c => c.parentElement.classList.add('flipped'));
-                setTimeout(() => {
-                    document.querySelectorAll('.card-inner').forEach(c => c.parentElement.classList.remove('flipped'));
-                    gameActive = true; // เริ่มเล่นได้
-                }, 4000); // 2 วิโชว์ + 2 วิสลับ
-            }, 1000);
-        }
-
-        function flipCard(index, id) {
-            if (!gameActive || flippedCards.length === 2) return;
-            const card = document.getElementById(`card-${index}`).parentElement;
-            if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
-
-            // เริ่มจับเวลาเมื่อกดใบแรก
-            if (timeLeft === 60 && !timerInterval) startTimer();
-
-            sfx.flip.play();
-            card.classList.add('flipped');
-            flippedCards.push({ index, id });
-
-            if (flippedCards.length === 2) {
-                checkMatch();
-            }
-            resetIdleTimer();
-        }
-
-        function checkMatch() {
-            const [c1, c2] = flippedCards;
-            const el1 = document.getElementById(`card-${c1.index}`);
-            const el2 = document.getElementById(`card-${c2.index}`);
-
-            if (c1.id === c2.id) {
-                sfx.correct.play();
-                el1.querySelector('.aura-correct').style.opacity = 1;
-                el2.querySelector('.aura-correct').style.opacity = 1;
-                matchedPairs++;
-                flippedCards = [];
-                if (matchedPairs === 9) endGame(true);
-            } else {
-                sfx.wrong.play();
-                el1.querySelector('.aura-wrong').style.opacity = 1;
-                el2.querySelector('.aura-wrong').style.opacity = 1;
-                setTimeout(() => {
-                    el1.parentElement.classList.remove('flipped');
-                    el2.parentElement.classList.remove('flipped');
-                    el1.querySelector('.aura-wrong').style.opacity = 0;
-                    el2.querySelector('.aura-wrong').style.opacity = 0;
-                    flippedCards = [];
-                }, 1000);
+            for(let i=0; i<18; i++) {
+                const div = document.createElement('div');
+                div.className = 'card-container';
+                div.innerHTML = `<img src="assets/card_back.png" class="card-img">`;
+                grid.appendChild(div);
             }
         }
-
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                const percent = (timeLeft / 60) * 100;
-                document.getElementById('time-bar-color').style.width = percent + '%';
-                document.getElementById('bear-timer-head').style.left = percent + '%';
-                if (timeLeft <= 0) endGame(false);
-            }, 1000);
-        }
-
-        function endGame(win) {
-            gameActive = false;
-            clearInterval(timerInterval);
-            sfx.bgm.pause();
-            
-            if (win) {
-                showScreen('screen-win');
-                sfx.win.play();
-            } else {
-                showScreen('screen-lose');
-                sfx.lose.play();
-            }
-
-            // หลังจากจบเสียง Win/Lose ให้เพลงกลับมา
-            setTimeout(() => {
-                sfx.bgm.volume = 0.5;
-                sfx.bgm.play();
-            }, 3000);
-        }
-
-        // ระบบ Idle 2 นาที
-        function resetIdleTimer() {
-            clearTimeout(idleTimer);
-            idleTimer = setTimeout(() => {
-                // ตัดเข้าวิดีโอแนวตั้ง (สมมติว่ารีโหลดไปหน้าที่มีวิดีโออย่างเดียว)
-                location.reload(); 
-            }, 120000);
-        }
-        document.onclick = resetIdleTimer;
     </script>
 </body>
 </html>
