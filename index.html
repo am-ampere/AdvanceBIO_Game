@@ -2,104 +2,619 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>AdvanceBIO Memory Game - Production</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdvanceBIO Memory Game</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { width: 100vw; height: 100vh; overflow: hidden; background: #000; }
-        .screen { position: absolute; width: 100vw; height: 100vh; background-size: 100% 100%; display: none; }
 
-        /* หน้าที่ 1 */
-        #screen-1 { display: block; background-image: url('assets/BG_First.jpg'); }
-        #btn-start { position: absolute; top: 65vh; left: 50vw; transform: translateX(-50%); width: 15vw; cursor: pointer; }
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+            background: #000;
+        }
 
-        /* หน้าที่ 2 */
-        #screen-2 { background-image: url('assets/BG_start.jpg'); }
-        #txt-gamestart { position: absolute; top: 50vh; left: 50vw; transform: translate(-50%, -50%); width: 40vw; display: none; }
+        /* ===== SCREENS ===== */
+        .screen {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+        .screen.active { display: block; }
 
-        /* หน้าที่ 3: เกม (แก้ 1, 2, 3, 5 ครบ) */
-        #screen-3 { background-image: url('assets/BG_Playgame.jpg'); }
-        #btn-home { position: absolute; top: 3vh; right: 3vw; width: 5vw; z-index: 20; cursor: pointer; }
-        
-        /* แก้ไข 1: วิดีโอพื้นดำ */
-        #bear-action-play { position: absolute; bottom: 2vh; right: 2vw; width: 18vw; object-fit: cover; }
-        
-        /* แก้ไข 2: หลอดเวลาให้ซ้อนกัน */
-        #timer-container { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 6vh; display: flex; align-items: center; }
-        #time-bar-bg { position: absolute; width: 100%; z-index: 1; }
-        #time-bar-color { position: absolute; height: 60%; left: 0; z-index: 2; background: url('assets/time-bar-color.png'); background-size: 100% 100%; transition: width 0.1s; }
-        #bear-timer-head { position: absolute; height: 120%; z-index: 3; transition: left 0.1s; }
+        /* ===== SCREEN 1: IDLE ===== */
+        #screen-1 {
+            background-image: url('assets/BG_First.jpg');
+        }
+        #btn-start {
+            position: absolute;
+            top: 68%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16vw;
+            cursor: pointer;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            z-index: 10;
+        }
+        #btn-start:hover { transform: translate(-50%, -50%) scale(1.05); filter: brightness(1.1); }
+        #btn-start:active { transform: translate(-50%, -50%) scale(0.97); }
 
-        /* แก้ไข 3: ออร่าให้พอดี */
-        #grid { position: absolute; top: 22vh; left: 50vw; transform: translateX(-50%); width: 75vw; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.5vh; }
-        .card-container { perspective: 1000px; aspect-ratio: 1/1; cursor: pointer; }
-        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flipped .card-inner { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; object-fit: contain; }
-        .card-front { transform: rotateY(180deg); }
-        .aura { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 5; pointer-events: none; }
+        /* ===== SCREEN 2: START ===== */
+        #screen-2 {
+            background-image: url('assets/BG_start.jpg');
+        }
+        #start-card-show {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 14vw;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 5;
+        }
+        #txt-gamestart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            width: 38vw;
+            opacity: 0;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            z-index: 10;
+            display: none;
+        }
+        #txt-gamestart.pop {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
 
-        #screen-win, #screen-lose { background-size: cover; }
+        /* ===== SCREEN 3: PLAY ===== */
+        #screen-3 {
+            background-image: url('assets/BG_Playgame.jpg');
+        }
+
+        /* Home button */
+        .btn-home {
+            position: absolute;
+            top: 2.5vh;
+            right: 2.5vw;
+            width: 5vw;
+            cursor: pointer;
+            z-index: 20;
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .btn-home:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .btn-home:active { transform: scale(0.95); }
+
+        /* Bear action video */
+        #bear-action-play {
+            position: absolute;
+            bottom: 1vh;
+            right: 1vw;
+            width: 17vw;
+            z-index: 5;
+        }
+
+        /* ===== TIMER ===== */
+        #timer-container {
+            position: absolute;
+            top: 2.5vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32vw;
+            height: 7vh;
+            z-index: 10;
+        }
+        #time-bar-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+        #time-bar-track {
+            position: absolute;
+            top: 22%;
+            left: 2%;
+            width: 96%;
+            height: 56%;
+            overflow: hidden;
+            border-radius: 999px;
+        }
+        #time-bar-color {
+            width: 100%;
+            height: 100%;
+            background: url('assets/time-bar-color.png') left center / auto 100% no-repeat;
+            transition: width 0.25s linear;
+        }
+        #bear-timer-head {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: 9vh;
+            left: 100%;
+            transition: left 0.25s linear;
+            z-index: 15;
+        }
+
+        /* ===== CARD GRID ===== */
+        #grid {
+            position: absolute;
+            top: 13vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 76vw;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.2vw;
+            z-index: 5;
+        }
+
+        .card-container {
+            perspective: 1000px;
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-container.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+        }
+
+        /* Aura overlay */
+        .aura {
+            position: absolute;
+            top: -12%;
+            left: -12%;
+            width: 124%;
+            height: 124%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            object-fit: contain;
+        }
+
+        .card-container.matched .card-inner {
+            cursor: default;
+        }
+
+        /* ===== WIN / LOSE SCREENS ===== */
+        #screen-win {
+            background-image: url('assets/BG_Win.jpg');
+        }
+        #screen-lose {
+            background-image: url('assets/BG_Lose.jpg');
+        }
+
+        /* Fade transition overlay */
+        #fade-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease;
+        }
+        #fade-overlay.fade-in { opacity: 1; pointer-events: all; }
     </style>
 </head>
 <body>
 
-    <div id="screen-1" class="screen"><img id="btn-start" src="assets/btn-start.png" onclick="goToStartScreen()"></div>
-    <div id="screen-2" class="screen"><img id="txt-gamestart" src="assets/txt-gamestart.png"></div>
-    <div id="screen-3" class="screen">
-        <img id="btn-home" src="assets/btn-home.png" onclick="location.reload()">
-        <video id="bear-action-play" src="assets/bear-action.mp4" loop muted autoplay></video>
-        <div id="timer-container">
-            <img id="time-bar-bg" src="assets/time-bar-bg.png">
+<!-- Fade overlay -->
+<div id="fade-overlay"></div>
+
+<!-- ===== SCREEN 1: IDLE ===== -->
+<div id="screen-1" class="screen active">
+    <img id="btn-start" src="assets/btn-start.png" alt="Start">
+</div>
+
+<!-- ===== SCREEN 2: START ===== -->
+<div id="screen-2" class="screen">
+    <img id="start-card-show" src="assets/back-card-start.png" alt="Card Back">
+    <img id="txt-gamestart" src="assets/txt-gamestart.png" alt="Game Start">
+</div>
+
+<!-- ===== SCREEN 3: PLAY ===== -->
+<div id="screen-3" class="screen">
+    <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
+    <video id="bear-action-play" src="assets/bear-action.mp4" loop muted playsinline></video>
+
+    <div id="timer-container">
+        <img id="time-bar-bg" src="assets/time-bar-bg.png" alt="">
+        <div id="time-bar-track">
             <div id="time-bar-color"></div>
-            <img id="bear-timer-head" src="assets/bear-timer-head.png">
         </div>
-        <div id="grid"></div>
+        <img id="bear-timer-head" src="assets/bear-timer-head.png" alt="">
     </div>
-    <div id="screen-win" class="screen"></div>
-    <div id="screen-lose" class="screen"></div>
 
-    <script>
-        // แก้ไข 4: ใช้ชื่อไฟล์ sound game.mp3 ให้ถูกต้อง
-        const sfx = {
-            bgm: new Audio('assets/sound game.mp3'),
-            click: new Audio('assets/click.mp3'),
-            flip: new Audio('assets/flip.mp3'),
-            correct: new Audio('assets/correct.mp3'),
-            wrong: new Audio('assets/wrong.mp3'),
-            win: new Audio('assets/win.mp3'),
-            lose: new Audio('assets/lose.mp3')
-        };
-        sfx.bgm.loop = true;
+    <div id="grid"></div>
+</div>
 
-        let gameActive = false, timeLeft = 60, timerInterval, flippedCards = [], matchedPairs = 0;
+<!-- ===== SCREEN WIN ===== -->
+<div id="screen-win" class="screen">
+    <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
+</div>
 
-        function goToStartScreen() {
-            sfx.click.play(); sfx.bgm.play();
-            document.getElementById('screen-1').style.display = 'none';
-            document.getElementById('screen-2').style.display = 'block';
-            document.getElementById('txt-gamestart').style.display = 'block';
-            setTimeout(goToPlayScreen, 2000);
-        }
+<!-- ===== SCREEN LOSE ===== -->
+<div id="screen-lose" class="screen">
+    <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
+</div>
 
-        function goToPlayScreen() {
-            document.getElementById('screen-2').style.display = 'none';
-            document.getElementById('screen-3').style.display = 'block';
-            setupGame();
-        }
+<script>
+// ===================================================
+//  AUDIO SETUP
+// ===================================================
+const bgm = new Audio('assets/sound game.mp3');
+bgm.loop = true;
+bgm.volume = 0.6;
 
-        function setupGame() {
-            const grid = document.getElementById('grid');
-            const cardData = [ /* ใส่ข้อมูลการ์ด 18 ใบที่นี่ */ ];
-            // ... (ใส่ Logic การสลับการ์ดเดิมที่คุณมี) ...
+const sfx = {
+    click:   new Audio('assets/click.mp3'),
+    flip:    new Audio('assets/flip.mp3'),
+    correct: new Audio('assets/correct.mp3'),
+    wrong:   new Audio('assets/wrong.mp3'),
+    win:     new Audio('assets/win.mp3'),
+    lose:    new Audio('assets/lose.mp3'),
+};
+
+// เล่น BGM ทันทีเมื่อโหลดหน้า (ต้องรอ user interaction ก่อนบน browser ส่วนใหญ่)
+function tryPlayBGM() {
+    bgm.play().catch(() => {
+        // ถ้า browser บล็อก autoplay รอ interaction แรก
+        document.addEventListener('click', () => bgm.play(), { once: true });
+        document.addEventListener('touchstart', () => bgm.play(), { once: true });
+    });
+}
+tryPlayBGM();
+
+function playSound(name) {
+    try {
+        sfx[name].currentTime = 0;
+        sfx[name].play();
+    } catch(e) {}
+}
+
+// ===================================================
+//  SCREEN MANAGEMENT
+// ===================================================
+function showScreen(id, callback) {
+    const overlay = document.getElementById('fade-overlay');
+    overlay.classList.add('fade-in');
+    setTimeout(() => {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        overlay.classList.remove('fade-in');
+        if (callback) callback();
+    }, 400);
+}
+
+// ===================================================
+//  IDLE TIMER (2 minutes)
+// ===================================================
+let idleTimer;
+function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+        location.reload();
+    }, 120000);
+}
+document.addEventListener('click', resetIdleTimer);
+document.addEventListener('touchstart', resetIdleTimer);
+resetIdleTimer();
+
+// ===================================================
+//  SCREEN 1 → SCREEN 2
+// ===================================================
+document.getElementById('btn-start').addEventListener('click', goToStartScreen);
+
+function goToStartScreen() {
+    playSound('click');
+    if (bgm.paused) bgm.play();
+    showScreen('screen-2', () => {
+        runStartAnimation();
+    });
+}
+
+function runStartAnimation() {
+    const cardEl  = document.getElementById('start-card-show');
+    const txtEl   = document.getElementById('txt-gamestart');
+    txtEl.style.display = 'block';
+    txtEl.classList.remove('pop');
+
+    // 1) fade in การ์ดหลัง
+    cardEl.style.opacity = '0';
+    setTimeout(() => {
+        cardEl.style.opacity = '1';
+    }, 100);
+
+    // 2) หลัง 1.2s → pop txt-gamestart
+    setTimeout(() => {
+        txtEl.classList.add('pop');
+    }, 1200);
+
+    // 3) หลัง 3.5s → ไปหน้าเกม
+    setTimeout(() => {
+        goToPlayScreen();
+    }, 3500);
+}
+
+// ===================================================
+//  SCREEN 2 → SCREEN 3
+// ===================================================
+function goToPlayScreen() {
+    showScreen('screen-3', () => {
+        bgm.volume = 0.25; // fade down BGM
+        document.getElementById('bear-action-play').play();
+        setupGame();
+    });
+}
+
+// ===================================================
+//  HOME BUTTON
+// ===================================================
+function goHome() {
+    playSound('click');
+    gameActive = false;
+    clearInterval(timerInterval);
+    bgm.volume = 0.6;
+    if (bgm.paused) bgm.play();
+
+    // reset txt-gamestart
+    const txtEl = document.getElementById('txt-gamestart');
+    txtEl.style.display = 'none';
+    txtEl.classList.remove('pop');
+
+    showScreen('screen-1');
+}
+
+// ===================================================
+//  GAME STATE
+// ===================================================
+const TOTAL_PAIRS = 9;
+const GAME_TIME   = 60;
+
+let gameActive     = false;
+let timeLeft       = GAME_TIME;
+let timerInterval  = null;
+let timerStarted   = false;
+let flippedCards   = [];
+let matchedPairs   = 0;
+let isChecking     = false;
+
+const cardData = [
+    { id: 1,  img1: '100_biodegradable_1.png',        img2: '100_biodegradable_2.png'        },
+    { id: 2,  img1: 'biodegradable_handle_bags_1.png', img2: 'biodegradable_handle_bags_2.png'},
+    { id: 3,  img1: 'biodegradable_plastic_1.png',     img2: 'biodegradable_plastic_2.png'    },
+    { id: 4,  img1: 'ceo_addy_1.png',                  img2: 'ceo_addy_2.png'                 },
+    { id: 5,  img1: 'eco-friendly_1.png',               img2: 'eco-friendly_2.png'              },
+    { id: 6,  img1: 'ecoplas_1.png',                    img2: 'ecoplas_2.png'                   },
+    { id: 7,  img1: 'handle_bags_1.png',                img2: 'handle_bags_2.png'               },
+    { id: 8,  img1: 'nature_x_1.png',                   img2: 'nature_x_2.png'                  },
+    { id: 9,  img1: 'set_cafe_1.png',                   img2: 'set_cafe_2.png'                  },
+];
+
+// ===================================================
+//  SETUP GAME
+// ===================================================
+function setupGame() {
+    gameActive    = false;
+    timerStarted  = false;
+    timeLeft      = GAME_TIME;
+    flippedCards  = [];
+    matchedPairs  = 0;
+    isChecking    = false;
+
+    // Reset timer bar
+    document.getElementById('time-bar-color').style.width = '100%';
+    document.getElementById('bear-timer-head').style.left = '100%';
+
+    // Build deck: each pair expanded into 2 cards
+    const deck = [];
+    cardData.forEach(pair => {
+        deck.push({ id: pair.id, img: pair.img1 });
+        deck.push({ id: pair.id, img: pair.img2 });
+    });
+
+    // Shuffle
+    deck.sort(() => Math.random() - 0.5);
+
+    // Render grid
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    deck.forEach((data, index) => {
+        const container = document.createElement('div');
+        container.className = 'card-container';
+        container.dataset.index = index;
+        container.dataset.id    = data.id;
+
+        container.innerHTML = `
+            <div class="card-inner">
+                <img src="assets/${data.img}" class="card-front" alt="card front">
+                <img src="assets/back-card-start.png" class="card-back" alt="card back">
+                <img src="assets/aura-correct.png" class="aura aura-correct" alt="">
+                <img src="assets/aura-wrong.png"   class="aura aura-wrong"   alt="">
+            </div>
+        `;
+        container.addEventListener('click', () => onCardClick(container));
+        grid.appendChild(container);
+    });
+
+    // === INTRO SEQUENCE ===
+    // Step 1: t=0       → การ์ดทุกใบเริ่มเป็นหน้าหลัง (ค่าเริ่มต้น)
+    // Step 2: t=800ms   → พลิกโชว์หน้าการ์ดทุกใบ (2 วิ)
+    // Step 3: t=2800ms  → สลับการ์ด (shuffle อีกครั้ง) แล้วโชว์ไว้ 2 วิ
+    // Step 4: t=5500ms  → พลิกกลับเป็นหลัง → เริ่มเล่นได้
+
+    const allCards = grid.querySelectorAll('.card-container');
+
+    // Step 2: โชว์หน้าการ์ด
+    setTimeout(() => {
+        allCards.forEach(c => c.classList.add('flipped'));
+    }, 800);
+
+    // Step 3: สลับการ์ด (shuffle visual positions via re-render)
+    setTimeout(() => {
+        // Shuffle DOM order to look like shuffling
+        const items = Array.from(grid.children);
+        items.sort(() => Math.random() - 0.5);
+        items.forEach(item => grid.appendChild(item));
+    }, 2800);
+
+    // Step 4: พลิกกลับ → เริ่มเล่น
+    setTimeout(() => {
+        allCards.forEach(c => c.classList.remove('flipped'));
+        setTimeout(() => {
             gameActive = true;
-        }
+        }, 600); // รอ animation พลิกจบ
+    }, 5000);
+}
 
-        function flipCard(index, id) {
-            if (!gameActive) return;
-            // ... (ใส่ Logic การเช็คคู่ออร่าเดิมที่เคยทำ) ...
-        }
+// ===================================================
+//  CARD CLICK
+// ===================================================
+function onCardClick(container) {
+    if (!gameActive || isChecking) return;
+    if (container.classList.contains('flipped')) return;
+    if (container.classList.contains('matched')) return;
+    if (flippedCards.length >= 2) return;
 
-        // ระบบจับเวลาและจบเกมเหมือนเดิม
-    </script>
+    // เริ่มจับเวลาเมื่อกดการ์ดใบแรก
+    if (!timerStarted) {
+        timerStarted = true;
+        startTimer();
+    }
+
+    playSound('flip');
+    container.classList.add('flipped');
+    flippedCards.push(container);
+
+    if (flippedCards.length === 2) {
+        isChecking = true;
+        setTimeout(checkMatch, 700);
+    }
+
+    resetIdleTimer();
+}
+
+// ===================================================
+//  CHECK MATCH
+// ===================================================
+function checkMatch() {
+    const [c1, c2] = flippedCards;
+    const id1 = c1.dataset.id;
+    const id2 = c2.dataset.id;
+
+    if (id1 === id2) {
+        // ✅ ถูก
+        playSound('correct');
+        c1.querySelector('.aura-correct').style.opacity = 1;
+        c2.querySelector('.aura-correct').style.opacity = 1;
+        c1.classList.add('matched');
+        c2.classList.add('matched');
+        matchedPairs++;
+        flippedCards = [];
+        isChecking   = false;
+
+        if (matchedPairs === TOTAL_PAIRS) {
+            setTimeout(() => endGame(true), 500);
+        }
+    } else {
+        // ❌ ผิด
+        playSound('wrong');
+        c1.querySelector('.aura-wrong').style.opacity = 1;
+        c2.querySelector('.aura-wrong').style.opacity = 1;
+
+        setTimeout(() => {
+            c1.classList.remove('flipped');
+            c2.classList.remove('flipped');
+            c1.querySelector('.aura-wrong').style.opacity = 0;
+            c2.querySelector('.aura-wrong').style.opacity = 0;
+            flippedCards = [];
+            isChecking   = false;
+        }, 1000);
+    }
+}
+
+// ===================================================
+//  TIMER
+// ===================================================
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const pct = Math.max(0, (timeLeft / GAME_TIME) * 100);
+        document.getElementById('time-bar-color').style.width = pct + '%';
+        document.getElementById('bear-timer-head').style.left = pct + '%';
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            endGame(false);
+        }
+    }, 1000);
+}
+
+// ===================================================
+//  END GAME
+// ===================================================
+function endGame(win) {
+    gameActive = false;
+    clearInterval(timerInterval);
+
+    // หยุด BGM ก่อน
+    bgm.pause();
+
+    if (win) {
+        showScreen('screen-win', () => {
+            playSound('win');
+            // หลังเสียง win จบ → กลับเล่น BGM
+            sfx.win.addEventListener('ended', () => {
+                bgm.volume = 0.6;
+                bgm.play();
+            }, { once: true });
+        });
+    } else {
+        showScreen('screen-lose', () => {
+            playSound('lose');
+            sfx.lose.addEventListener('ended', () => {
+                bgm.volume = 0.6;
+                bgm.play();
+            }, { once: true });
+        });
+    }
+}
+</script>
 </body>
 </html>
