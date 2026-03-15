@@ -8,38 +8,37 @@
         body, html { width: 100vw; height: 100vh; overflow: hidden; background: #000; }
         .screen { position: absolute; width: 100vw; height: 100vh; background-size: cover; background-position: center; display: none; }
         
-        /* หน้า 1: Idle */
+        /* หน้า 1 */
         #screen-1 { display: block; background-image: url('assets/BG_First.jpg'); }
-        #btn-start { position: absolute; top: 65vh; left: 50vw; transform: translateX(-50%); width: 18vw; cursor: pointer; }
+        #btn-start { position: absolute; top: 65vh; left: 50vw; transform: translateX(-50%); width: 15vw; cursor: pointer; }
 
-        /* หน้า 3: Play */
+        /* หน้า 3 (หน้าเล่นเกม) */
         #screen-3 { background-image: url('assets/BG_Playgame.jpg'); }
         #btn-home { position: absolute; top: 3vh; right: 3vw; width: 5vw; z-index: 20; cursor: pointer; }
-        #bear-video { position: absolute; bottom: 2vh; right: 2vw; width: 18vw; object-fit: cover; }
+        #bear-video { position: absolute; bottom: 2vh; right: 2vw; width: 15vw; object-fit: cover; }
         
-        /* แถบเวลา: แก้ไขให้ซ้อนกัน */
-        #timer-box { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 6vh; display: flex; align-items: center; }
-        #time-bar-bg { position: absolute; width: 100%; z-index: 1; }
-        #time-bar-color { position: absolute; left: 0; height: 60%; width: 100%; background: url('assets/time-bar-color.png'); background-size: 100% 100%; z-index: 2; transition: width 0.1s; }
+        /* แถบเวลา (ซ้อนกัน) */
+        #timer-box { position: absolute; top: 3vh; left: 50vw; transform: translateX(-50%); width: 30vw; height: 5vh; display: flex; align-items: center; }
+        #time-bar-bg { position: absolute; width: 100%; height: 100%; z-index: 1; }
+        #time-bar-color { position: absolute; height: 60%; left: 0; width: 100%; background: url('assets/time-bar-color.png'); background-size: cover; z-index: 2; transition: width 0.1s; }
         #bear-timer-head { position: absolute; height: 120%; z-index: 3; left: 100%; transition: left 0.1s; }
 
-        /* การ์ดและออร่า */
+        /* ตารางการ์ด */
         #grid { position: absolute; top: 20vh; left: 10vw; width: 80vw; display: grid; grid-template-columns: repeat(6, 1fr); gap: 1vw; }
-        .card-container { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; }
-        .card-img { width: 100%; height: 100%; object-fit: contain; }
-        .aura { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+        .card-container { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; perspective: 1000px; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; object-fit: contain; }
+        .card-front { transform: rotateY(180deg); }
+        .aura { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 5; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div id="screen-1" class="screen">
-        <img id="btn-start" src="assets/btn-start.png" onclick="startGame()">
-    </div>
-
+    <div id="screen-1" class="screen"><img id="btn-start" src="assets/btn-start.png" onclick="startGame()"></div>
     <div id="screen-3" class="screen">
         <img id="btn-home" src="assets/btn-home.png" onclick="location.reload()">
         <video id="bear-video" src="assets/bear-action.mp4" loop muted autoplay></video>
-        
         <div id="timer-box">
             <img id="time-bar-bg" src="assets/time-bar-bg.png">
             <div id="time-bar-color"></div>
@@ -49,17 +48,11 @@
     </div>
 
     <script>
-        // แก้ไขชื่อไฟล์เสียงให้ตรงตามชื่อจริงที่คุณบอกครับ
-        const sfx = {
-            bgm: new Audio('assets/sound game.mp3'),
-            click: new Audio('assets/click.mp3')
-        };
+        const sfx = { bgm: new Audio('assets/sound game.mp3'), click: new Audio('assets/click.mp3'), flip: new Audio('assets/flip.mp3'), correct: new Audio('assets/correct.mp3'), wrong: new Audio('assets/wrong.mp3') };
+        let flipped = [], matched = 0, gameActive = false, timeLeft = 60, timer;
 
         function startGame() {
-            sfx.click.play();
-            sfx.bgm.loop = true;
-            sfx.bgm.play().catch(e => console.log("รอการคลิกก่อนเริ่มเสียง"));
-            
+            sfx.click.play(); sfx.bgm.play();
             document.getElementById('screen-1').style.display = 'none';
             document.getElementById('screen-3').style.display = 'block';
             setupGame();
@@ -67,14 +60,54 @@
 
         function setupGame() {
             const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            for(let i=0; i<18; i++) {
+            const images = ['100_biodegradable_1.png', '100_biodegradable_2.png', 'biodegradable_handle_bags_1.png', 'biodegradable_handle_bags_2.png', 'biodegradable_plastic_1.png', 'biodegradable_plastic_2.png', 'ceo_addy_1.png', 'ceo_addy_2.png', 'eco-friendly_1.png', 'eco-friendly_2.png', 'ecoplas_1.png', 'ecoplas_2.png', 'handle_bags_1.png', 'handle_bags_2.png', 'nature_x_1.png', 'nature_x_2.png', 'set_cafe_1.png', 'set_cafe_2.png'];
+            images.sort(() => Math.random() - 0.5);
+            
+            images.forEach((img, i) => {
                 const div = document.createElement('div');
                 div.className = 'card-container';
-                // ใช้ card_back.png ตามที่คุณบอก
-                div.innerHTML = `<img src="assets/card_back.png" class="card-img">`;
+                div.innerHTML = `<div class="card-inner" id="card-${i}" onclick="flip('${img}', ${i})"><img src="assets/${img}" class="card-front"><img src="assets/card_back.png" class="card-back"><img src="assets/aura-correct.png" class="aura"></div>`;
                 grid.appendChild(div);
+            });
+            setTimeout(() => gameActive = true, 2000);
+        }
+
+        function flip(img, i) {
+            if (!gameActive || flipped.length >= 2) return;
+            if (timeLeft === 60) startTimer();
+            
+            sfx.flip.play();
+            document.getElementById(`card-${i}`).classList.add('flipped');
+            flipped.push({img, i});
+
+            if (flipped.length === 2) {
+                checkMatch();
             }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flipped;
+            const match = (c1.img.split('_')[0] === c2.img.split('_')[0]); // สมมติว่าไฟล์ที่คู่กันมีชื่อขึ้นต้นเหมือนกัน
+            if (match) {
+                sfx.correct.play(); matched++;
+                if (matched === 9) alert("ชนะ!");
+            } else {
+                sfx.wrong.play();
+                setTimeout(() => {
+                    document.getElementById(`card-${c1.i}`).classList.remove('flipped');
+                    document.getElementById(`card-${c2.i}`).classList.remove('flipped');
+                }, 1000);
+            }
+            flipped = [];
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time-bar-color').style.width = (timeLeft / 60 * 100) + '%';
+                document.getElementById('bear-timer-head').style.left = (timeLeft / 60 * 100) + '%';
+                if (timeLeft <= 0) { clearInterval(timer); alert("แพ้!"); }
+            }, 1000);
         }
     </script>
 </body>
