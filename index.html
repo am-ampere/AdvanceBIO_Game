@@ -141,15 +141,15 @@
         /* ===== CARD GRID ===== */
         #grid {
             position: absolute;
-            top: 13vh;
+            top: 14vh;
             left: 50%;
             transform: translateX(-50%);
-            width: 62vw;
-            height: 80vh;
+            width: 55vw;
+            height: 78vh;
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 0.8vw;
+            gap: 1vw;
             z-index: 5;
         }
 
@@ -405,7 +405,7 @@ function goHome() {
 // ===================================================
 //  GAME STATE
 // ===================================================
-const TOTAL_PAIRS = 9;
+const TOTAL_PAIRS = 6;
 const GAME_TIME   = 60;
 
 let gameActive     = false;
@@ -417,15 +417,12 @@ let matchedPairs   = 0;
 let isChecking     = false;
 
 const cardData = [
-    { id: 1,  img1: '100_biodegradable_1.png',        img2: '100_biodegradable_2.png'        },
-    { id: 2,  img1: 'biodegradable handle bags_1.png', img2: 'biodegradable handle bags_2.png'},
-    { id: 3,  img1: 'biodegradable_plastic_1.png',     img2: 'biodegradable_plastic_2.png'    },
-    { id: 4,  img1: 'ceo_addy_1.png',                  img2: 'ceo_addy_2.png'                 },
-    { id: 5,  img1: 'eco-friendly_1.png',               img2: 'eco-friendly_2.png'              },
-    { id: 6,  img1: 'ecoplas_1.png',                    img2: 'ecoplas_2.png'                   },
-    { id: 7,  img1: 'handle_bags_1.png',                img2: 'handle_bags_2.png'               },
-    { id: 8,  img1: 'nature_x_1.png',                   img2: 'nature_x_2.png'                  },
-    { id: 9,  img1: 'set_cafe_1.png',                   img2: 'set_cafe_2.png'                  },
+    { id: 1, img1: 'biodegradable handle bags_1.png', img2: 'biodegradable handle bags_2.png' },
+    { id: 2, img1: 'biodegradable plastic_1.png',     img2: 'biodegradable plastic_2.png'     },
+    { id: 3, img1: 'ceo_addy_1.png',                  img2: 'ceo_addy_2.png'                  },
+    { id: 4, img1: 'ecoplas_1.png',                    img2: 'ecoplas_2.png'                   },
+    { id: 5, img1: 'nature_x_1.png',                   img2: 'nature_x_2.png'                  },
+    { id: 6, img1: 'set_cafe_1.png',                   img2: 'set_cafe_2.png'                  },
 ];
 
 // ===================================================
