@@ -232,6 +232,84 @@
             background-image: url('assets/BG_Lose.jpg');
         }
 
+        /* ===== WIN/LOSE ANIMATIONS ===== */
+        @keyframes bounceDown {
+            0%   { transform: translateY(-120px) scale(0.7); opacity: 0; }
+            60%  { transform: translateY(20px) scale(1.08); opacity: 1; }
+            80%  { transform: translateY(-10px) scale(0.97); }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes slideUp {
+            0%   { transform: translateY(120px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes shakeDrop {
+            0%   { transform: translateY(-80px) rotate(-3deg); opacity: 0; }
+            30%  { transform: translateY(10px) rotate(3deg); opacity: 1; }
+            50%  { transform: translateY(-5px) rotate(-2deg); }
+            70%  { transform: translateY(5px) rotate(1deg); }
+            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        }
+        @keyframes starSpin {
+            0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+            50%  { transform: scale(1.3) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        @keyframes starPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50%       { transform: scale(1.3) rotate(20deg); opacity: 0.7; }
+        }
+
+        /* overlay elements */
+        .win-title, .lose-title,
+        .win-qr, .lose-qr,
+        .win-stars, .lose-stars { 
+            position: absolute; 
+            pointer-events: none;
+        }
+
+        /* WIN title - top center */
+        .win-title {
+            top: 0; left: 0; width: 100%; height: 28%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+        }
+        .win-title.animate {
+            animation: bounceDown 0.8s cubic-bezier(0.4,0,0.2,1) 0.2s forwards;
+        }
+
+        /* LOSE title */
+        .lose-title {
+            top: 0; left: 0; width: 100%; height: 28%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+        }
+        .lose-title.animate {
+            animation: shakeDrop 0.9s ease 0.2s forwards;
+        }
+
+        /* QR card area - left center */
+        .win-qr, .lose-qr {
+            top: 28%; left: 0; width: 55%; height: 65%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+        }
+        .win-qr.animate, .lose-qr.animate {
+            animation: slideUp 0.7s ease 0.6s forwards;
+        }
+
+        /* Stars */
+        .win-stars, .lose-stars {
+            top: 25%; left: 52%; width: 15%; height: 30%;
+            opacity: 0;
+        }
+        .win-stars.animate, .lose-stars.animate {
+            animation: starSpin 0.6s ease 0.9s forwards;
+        }
+        .win-stars.pulse, .lose-stars.pulse {
+            animation: starPulse 1.5s ease-in-out infinite;
+        }
+
         /* Fade transition overlay */
         #fade-overlay {
             position: fixed;
@@ -294,11 +372,17 @@
 <!-- ===== SCREEN WIN ===== -->
 <div id="screen-win" class="screen">
     <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
+    <div class="win-title" id="win-title"></div>
+    <div class="win-qr"    id="win-qr"></div>
+    <div class="win-stars" id="win-stars"></div>
 </div>
 
 <!-- ===== SCREEN LOSE ===== -->
 <div id="screen-lose" class="screen">
     <img class="btn-home" src="assets/btn-home.png" alt="Home" onclick="goHome()">
+    <div class="lose-title" id="lose-title"></div>
+    <div class="lose-qr"    id="lose-qr"></div>
+    <div class="lose-stars" id="lose-stars"></div>
 </div>
 
 <script>
@@ -610,6 +694,30 @@ function startTimer() {
     }, 1000);
 }
 
+function triggerResultAnimation(type) {
+    const prefix = type; // 'win' or 'lose'
+    const title  = document.getElementById(`${prefix}-title`);
+    const qr     = document.getElementById(`${prefix}-qr`);
+    const stars  = document.getElementById(`${prefix}-stars`);
+
+    // reset ก่อน
+    [title, qr, stars].forEach(el => {
+        el.classList.remove('animate', 'pulse');
+    });
+    void title.offsetWidth; // force reflow
+
+    // trigger animations
+    title.classList.add('animate');
+    qr.classList.add('animate');
+    stars.classList.add('animate');
+
+    // หลัง stars spin จบ → เปลี่ยนเป็น pulse loop
+    setTimeout(() => {
+        stars.classList.remove('animate');
+        stars.classList.add('pulse');
+    }, 1500);
+}
+
 // ===================================================
 //  END GAME
 // ===================================================
@@ -620,10 +728,18 @@ function endGame(win) {
 
     if (win) {
         playSound('win');
-        setTimeout(() => showScreen('screen-win'), 500);
+        setTimeout(() => {
+            showScreen('screen-win', () => {
+                triggerResultAnimation('win');
+            });
+        }, 500);
     } else {
         playSound('lose');
-        setTimeout(() => showScreen('screen-lose'), 500);
+        setTimeout(() => {
+            showScreen('screen-lose', () => {
+                triggerResultAnimation('lose');
+            });
+        }, 500);
     }
 }
 </script>
