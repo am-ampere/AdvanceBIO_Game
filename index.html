@@ -110,12 +110,11 @@
         /* ===== TIMER ===== */
         #timer-container {
             position: absolute;
-            position: absolute;
-            top: 5vh;
+            top: 3vh;
             left: 50%;
             transform: translateX(-50%);
-            width: 32vw;
-            height: 7vh;
+            width: 38vw;
+            height: 10vh;
             z-index: 10;
         }
         #time-bar-bg {
@@ -128,10 +127,10 @@
         }
         #time-bar-track {
             position: absolute;
-            top: 25%;
-            left: 4%;
-            width: 92%;
-            height: 50%;
+            top: 20%;
+            left: 8%;
+            width: 84%;
+            height: 60%;
             overflow: hidden;
             border-radius: 999px;
         }
@@ -358,7 +357,7 @@ let idleTimer;
 function resetIdleTimer() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-        window.location.href = 'video.html';
+        window.location.href = 'idle.html';
     }, 120000);
 }
 document.addEventListener('click', resetIdleTimer);
@@ -589,7 +588,7 @@ function checkMatch() {
             c2.querySelector('.aura-wrong').style.opacity = 0;
             flippedCards = [];
             isChecking   = false;
-        }, 1000);
+        }, 600);
     }
 }
 
