@@ -590,13 +590,16 @@ function checkMatch() {
         c1.querySelector('.aura-wrong').style.opacity = 1;
         c2.querySelector('.aura-wrong').style.opacity = 1;
 
+        // ปล่อยให้กดการ์ดใหม่ได้ทันที
+        flippedCards = [];
+        isChecking   = false;
+
+        // พลิกกลับและซ่อน aura หลัง 300ms
         setTimeout(() => {
             c1.classList.remove('flipped');
             c2.classList.remove('flipped');
             c1.querySelector('.aura-wrong').style.opacity = 0;
             c2.querySelector('.aura-wrong').style.opacity = 0;
-            flippedCards = [];
-            isChecking   = false;
         }, 300);
     }
 }
